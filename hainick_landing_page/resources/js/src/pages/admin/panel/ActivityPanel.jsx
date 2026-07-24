@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { API_URL } from "../../../utils/api";
 
-const API = "http://localhost:8000/api";
 
 const IMAGE_TYPE_OPTIONS = [
   "image_left",
@@ -1052,7 +1051,7 @@ const ActivityModal = ({
         // yang kebetulan punya image_type sama
         if (imageFile) {
           const fd = new FormData();
-          fd.append("image", imageFile);
+          fd.append("image_url", imageFile);
           // Gunakan endpoint baru by ID (lihat catatan backend di bawah)
           const res = await fetch(
             `${API_URL}/update-updates-section-image-by-id/${data.id}`,
@@ -1089,7 +1088,7 @@ const ActivityModal = ({
           return;
         }
         const fd = new FormData();
-        fd.append("image", imageFile);
+        fd.append("image_url", imageFile);
         fd.append("image_type", imageType);
         fd.append("description", description);
         // FIX: new record selalu is_active=0, biarkan user drag ke slot

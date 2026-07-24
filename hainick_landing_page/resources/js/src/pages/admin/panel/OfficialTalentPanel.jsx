@@ -97,7 +97,7 @@ const TalentModal = ({ mode, talent, onClose, onSaved }) => {
         talentId = data.id;
       } else if (imageFile) {
         const fd = new FormData();
-        fd.append("image", imageFile);
+        fd.append("image_url", imageFile);
         const res = await fetch(
           `${API_URL}/update-official-talent/${talentId}`,
           {
@@ -345,7 +345,7 @@ const DeleteConfirm = ({ talent, desc, onClose, onDeleted }) => {
 // ── Talent Card (admin grid) ──────────────────────────────────────────────────
 const AdminTalentCard = ({ talent, desc, index, onEdit, onDelete }) => {
   const [imgError, setImgError] = useState(false);
-  const photo = talent.image_url ? `${API_URL}${talent.image_url}` : null;
+  const photo = `${BASE_URL}`;
   const showFallback = !photo || imgError;
   const name = desc?.nama?.trim();
 

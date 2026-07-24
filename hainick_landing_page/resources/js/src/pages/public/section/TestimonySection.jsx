@@ -212,7 +212,7 @@ export const TestimonyPanel = ({ onDataChange }) => {
     const fd = new FormData();
     fd.append("name", fName.trim());
     fd.append("testimonial", fText.trim());
-    if (fFile) fd.append("image", fFile);
+    if (fFile) fd.append("profile_image", fFile);
     try {
       const url =
         modal === "add"
