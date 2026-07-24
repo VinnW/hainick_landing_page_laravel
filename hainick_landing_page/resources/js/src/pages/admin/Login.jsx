@@ -45,8 +45,11 @@ const Login = () => {
                 // Simpan token/session
                 auth.login(data.token);
 
-                // Redirect langsung ke AdminLayout
-                navigate("/admin/AdminLayout", { replace: true });
+                // FIX: sebelumnya "/admin/AdminLayout" -> route ini tidak
+                // ada di App.jsx. Route admin didefinisikan sebagai
+                // path="/admin/*" dengan index route HomePanel, jadi cukup
+                // arahkan ke "/admin" saja.
+                navigate("/admin", { replace: true });
             } else {
                 setError(data.error || data.message || "Login gagal.");
             }

@@ -1,7 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import App from "./App";
+// FIX: sebelumnya import dari "./App" (routing lama, TANPA ProtectedRoute).
+// Yang benar-benar dipakai harus AppRoutes.jsx di ./routes/, karena di situ
+// admin panel sudah dibungkus <ProtectedRoute />.
+import AppRoutes from "./routes/AppRoutes";
 import "./index.css";
 
 // Ambil elemen HTML tempat React akan di-mount (div #root di Blade)
@@ -13,7 +16,7 @@ if (rootElement) {
     root.render(
         <React.StrictMode>
             <BrowserRouter>
-                <App />
+                <AppRoutes />
             </BrowserRouter>
         </React.StrictMode>,
     );

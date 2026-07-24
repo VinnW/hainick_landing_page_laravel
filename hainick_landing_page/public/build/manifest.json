@@ -1,0 +1,73 @@
+{
+  "resources/js/src/index.jsx": {
+    "file": "assets/index-D9An6Wrn.js",
+    "name": "index",
+    "src": "resources/js/src/index.jsx",
+    "isEntry": true,
+    "css": [
+      "assets/index-fMO4tu7p.css"
+    ],
+    "assets": [
+      "assets/hainick_logo-BzjGZmkv.png",
+      "assets/a-Oz8iOg5P.png",
+      "assets/b-Cb7uzNoD.png",
+      "assets/c-klAzTrvI.png",
+      "assets/d-MPlVTKV-.png",
+      "assets/e-DbejIa2r.png",
+      "assets/f-CkhlMSH0.png",
+      "assets/center-CoTVD52n.png",
+      "assets/instagram-DQOGCOQU.png",
+      "assets/mail-CoTVKf5L.png",
+      "assets/telephone-CKTxurO6.png",
+      "assets/logo512-B8a4W3GC.png"
+    ]
+  },
+  "resources/js/src/storage/icon/instagram.png": {
+    "file": "assets/instagram-DQOGCOQU.png",
+    "src": "resources/js/src/storage/icon/instagram.png"
+  },
+  "resources/js/src/storage/icon/mail.png": {
+    "file": "assets/mail-CoTVKf5L.png",
+    "src": "resources/js/src/storage/icon/mail.png"
+  },
+  "resources/js/src/storage/icon/telephone.png": {
+    "file": "assets/telephone-CKTxurO6.png",
+    "src": "resources/js/src/storage/icon/telephone.png"
+  },
+  "resources/js/src/storage/logo/hainick_logo.png": {
+    "file": "assets/hainick_logo-BzjGZmkv.png",
+    "src": "resources/js/src/storage/logo/hainick_logo.png"
+  },
+  "resources/js/src/storage/logo/logo512.png": {
+    "file": "assets/logo512-B8a4W3GC.png",
+    "src": "resources/js/src/storage/logo/logo512.png"
+  },
+  "resources/js/src/storage/picture/a.png": {
+    "file": "assets/a-Oz8iOg5P.png",
+    "src": "resources/js/src/storage/picture/a.png"
+  },
+  "resources/js/src/storage/picture/b.png": {
+    "file": "assets/b-Cb7uzNoD.png",
+    "src": "resources/js/src/storage/picture/b.png"
+  },
+  "resources/js/src/storage/picture/c.png": {
+    "file": "assets/c-klAzTrvI.png",
+    "src": "resources/js/src/storage/picture/c.png"
+  },
+  "resources/js/src/storage/picture/center.png": {
+    "file": "assets/center-CoTVD52n.png",
+    "src": "resources/js/src/storage/picture/center.png"
+  },
+  "resources/js/src/storage/picture/d.png": {
+    "file": "assets/d-MPlVTKV-.png",
+    "src": "resources/js/src/storage/picture/d.png"
+  },
+  "resources/js/src/storage/picture/e.png": {
+    "file": "assets/e-DbejIa2r.png",
+    "src": "resources/js/src/storage/picture/e.png"
+  },
+  "resources/js/src/storage/picture/f.png": {
+    "file": "assets/f-CkhlMSH0.png",
+    "src": "resources/js/src/storage/picture/f.png"
+  }
+}
