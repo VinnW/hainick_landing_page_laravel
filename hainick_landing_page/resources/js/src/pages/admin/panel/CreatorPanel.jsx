@@ -69,7 +69,7 @@ function PhotoCardItem({ card, onUpdated }) {
     formData.append("image_url", pendingFile);
     try {
       const res = await fetch(
-        `${API_URL}/api/update-creators-photocard/${card.id}`,
+        `${API_URL}/update-creators-photocard/${card.id}`,
         { method: "PUT", body: formData },
       );
       if (!res.ok) throw new Error("Server error");
@@ -304,7 +304,7 @@ const CreatorPanel = () => {
   const fetchAll = async () => {
     setPageLoading(true);
     try {
-      const resCards = await fetch(`${API_URL}/api/creators-photocard`);
+      const resCards = await fetch(`${API_URL}/creators-photocard`);
       if (resCards.ok) {
         const data = await resCards.json();
         setCards((prev) =>
@@ -319,7 +319,7 @@ const CreatorPanel = () => {
       }
 
       const resStats = await fetch(
-        `${API_URL}/api/creators-photocard-statistics`,
+        `${API_URL}/creators-photocard-statistics`,
       );
       if (resStats.ok) {
         const data = await resStats.json();
@@ -353,7 +353,7 @@ const CreatorPanel = () => {
     setSeedLoading(true);
     setSeedMsg(null);
     try {
-      const res = await fetch(`${API_URL}/api/seed-creators-photocard`, {
+      const res = await fetch(`${API_URL}/seed-creators-photocard`, {
         method: "POST",
       });
       if (!res.ok) throw new Error("Gagal seed");
@@ -387,7 +387,7 @@ const CreatorPanel = () => {
     setStatsMsg(null);
     try {
       const res = await fetch(
-        `${API_URL}/api/update-creators-photocard-statistics`,
+        `${API_URL}/update-creators-photocard-statistics`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
