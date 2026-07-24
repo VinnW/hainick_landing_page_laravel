@@ -2,466 +2,501 @@ import { useState, useEffect } from "react";
 import { API_URL, BASE_URL } from "../../../utils/api";
 
 const TalentModal = ({ mode, talent, onClose, onSaved }) => {
-  const isEdit = mode === "edit";
+    const isEdit = mode === "edit";
 
-  const [form, setForm] = useState({
-    nama: "",
-    bio: "",
-    followers_ig: "",
-    followers_tiktok: "",
-    followers_twitter: "",
-    tinggi: "",
-    berat: "",
-    umur: "",
-  });
-  const [imageFile, setImageFile] = useState(null);
-  const [preview, setPreview] = useState(
-    talent?.image_url ? `${API_URL}${talent.image_url}` : null,
-  );
-  const [prefillLoading, setPrefillLoading] = useState(isEdit);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+    const [form, setForm] = useState({
+        nama: "",
+        bio: "",
+        followers_ig: "",
+        followers_tiktok: "",
+        followers_twitter: "",
+        tinggi: "",
+        berat: "",
+        umur: "",
+    });
+    const [imageFile, setImageFile] = useState(null);
+    const [preview, setPreview] = useState(
+        talent?.image_url ? `${BASE_URL}${talent.image_url}` : null,
+    );
+    const [prefillLoading, setPrefillLoading] = useState(isEdit);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-  // Ambil detail yang sudah ada ketika mode edit
-  useEffect(() => {
-    if (!isEdit || !talent?.id) return;
-    let active = true;
-    setPrefillLoading(true);
-    fetch(`${API_URL}/load-official-talent-desc/${talent.id}`, {
-      method: "GET",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Gagal mengambil detail talent");
-        return res.json();
-      })
-      .then((data) => {
-        if (!active) return;
-        const d = Array.isArray(data) ? data[0] : data;
-        if (d) {
-          setForm({
-            nama: d.nama || "",
-            bio: d.bio || "",
-            followers_ig: d.followers_ig ?? "",
-            followers_tiktok: d.followers_tiktok ?? "",
-            followers_twitter: d.followers_twitter ?? "",
-            tinggi: d.tinggi ?? "",
-            berat: d.berat ?? "",
-            umur: d.umur ?? "",
-          });
-        }
-      })
-      .catch((err) => {
-        if (active) setError(err.message);
-      })
-      .finally(() => {
-        if (active) setPrefillLoading(false);
-      });
-    return () => {
-      active = false;
+    // Ambil detail yang sudah ada ketika mode edit
+    useEffect(() => {
+        if (!isEdit || !talent?.id) return;
+        let active = true;
+        setPrefillLoading(true);
+        fetch(`${API_URL}/load-official-talent-desc/${talent.id}`, {
+            method: "GET",
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Gagal mengambil detail talent");
+                return res.json();
+            })
+            .then((data) => {
+                if (!active) return;
+                const d = Array.isArray(data) ? data[0] : data;
+                if (d) {
+                    setForm({
+                        nama: d.nama || "",
+                        bio: d.bio || "",
+                        followers_ig: d.followers_ig ?? "",
+                        followers_tiktok: d.followers_tiktok ?? "",
+                        followers_twitter: d.followers_twitter ?? "",
+                        tinggi: d.tinggi ?? "",
+                        berat: d.berat ?? "",
+                        umur: d.umur ?? "",
+                    });
+                }
+            })
+            .catch((err) => {
+                if (active) setError(err.message);
+            })
+            .finally(() => {
+                if (active) setPrefillLoading(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [isEdit, talent?.id]);
+
+    const handleChange = (e) => {
+        setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     };
-  }, [isEdit, talent?.id]);
 
-  const handleChange = (e) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-  };
+    const handleImage = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImageFile(file);
+        setPreview(URL.createObjectURL(file));
+    };
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImageFile(file);
-    setPreview(URL.createObjectURL(file));
-  };
+    const handleSubmit = async () => {
+        if (!isEdit && !imageFile) {
+            setError("Foto talent harus diunggah.");
+            return;
+        }
+        setLoading(true);
+        setError("");
 
-  const handleSubmit = async () => {
-    if (!isEdit && !imageFile) {
-      setError("Foto talent harus diunggah.");
-      return;
-    }
-    setLoading(true);
-    setError("");
+        try {
+            let talentId = talent?.id;
 
-    try {
-      let talentId = talent?.id;
+            // Langkah 1: simpan foto ── membuat row baru (trigger otomatis membuat
+            // row official_talent_desc) atau memperbarui foto yang sudah ada.
+            if (!isEdit) {
+                const fd = new FormData();
+                fd.append("image_url", imageFile);
+                const res = await fetch(`${API_URL}/create-official-talent`, {
+                    method: "POST",
+                    body: fd,
+                });
+                if (!res.ok) throw new Error("Gagal mengunggah foto talent");
+                const data = await res.json();
+                talentId = data.id;
+            } else if (imageFile) {
+                const fd = new FormData();
+                fd.append("image_url", imageFile);
+                const res = await fetch(
+                    `${API_URL}/update-official-talent/${talentId}`,
+                    {
+                        method: "PUT",
+                        body: fd,
+                    },
+                );
+                if (!res.ok) throw new Error("Gagal memperbarui foto talent");
+            }
 
-      // Langkah 1: simpan foto ── membuat row baru (trigger otomatis membuat
-      // row official_talent_desc) atau memperbarui foto yang sudah ada.
-      if (!isEdit) {
-        const fd = new FormData();
-        fd.append("image_url", imageFile);
-        const res = await fetch(`${API_URL}/create-official-talent`, {
-          method: "POST",
-          body: fd,
-        });
-        if (!res.ok) throw new Error("Gagal mengunggah foto talent");
-        const data = await res.json();
-        talentId = data.id;
-      } else if (imageFile) {
-        const fd = new FormData();
-        fd.append("image_url", imageFile);
-        const res = await fetch(
-          `${API_URL}/update-official-talent/${talentId}`,
-          {
-            method: "PUT",
-            body: fd,
-          },
-        );
-        if (!res.ok) throw new Error("Gagal memperbarui foto talent");
-      }
+            // Langkah 2: simpan detail talent (nama, bio, followers, dst)
+            const descRes = await fetch(
+                `${API_URL}/update-official-talent-desc/${talentId}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        nama: form.nama,
+                        bio: form.bio,
+                        followers_ig: form.followers_ig || 0,
+                        followers_tiktok: form.followers_tiktok || 0,
+                        followers_twitter: form.followers_twitter || 0,
+                        tinggi: form.tinggi || null,
+                        berat: form.berat || null,
+                        umur: form.umur || null,
+                    }),
+                },
+            );
+            if (!descRes.ok) throw new Error("Gagal menyimpan detail talent");
 
-      // Langkah 2: simpan detail talent (nama, bio, followers, dst)
-      const descRes = await fetch(
-        `${API_URL}/update-official-talent-desc/${talentId}`,
+            onSaved();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const textFields = [
         {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nama: form.nama,
-            bio: form.bio,
-            followers_ig: form.followers_ig || 0,
-            followers_tiktok: form.followers_tiktok || 0,
-            followers_twitter: form.followers_twitter || 0,
-            tinggi: form.tinggi || null,
-            berat: form.berat || null,
-            umur: form.umur || null,
-          }),
+            label: "Nama Lengkap",
+            name: "nama",
+            placeholder: "Nama lengkap talent",
         },
-      );
-      if (!descRes.ok) throw new Error("Gagal menyimpan detail talent");
+        {
+            label: "Followers Instagram",
+            name: "followers_ig",
+            placeholder: "misal: 50000",
+        },
+        {
+            label: "Followers TikTok",
+            name: "followers_tiktok",
+            placeholder: "misal: 120000",
+        },
+        {
+            label: "Followers Twitter",
+            name: "followers_twitter",
+            placeholder: "misal: 8000",
+        },
+        { label: "Tinggi (cm)", name: "tinggi", placeholder: "misal: 180" },
+        { label: "Berat (kg)", name: "berat", placeholder: "misal: 71" },
+        { label: "Umur (tahun)", name: "umur", placeholder: "misal: 27" },
+    ];
 
-      onSaved();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const textFields = [
-    { label: "Nama Lengkap", name: "nama", placeholder: "Nama lengkap talent" },
-    {
-      label: "Followers Instagram",
-      name: "followers_ig",
-      placeholder: "misal: 50000",
-    },
-    {
-      label: "Followers TikTok",
-      name: "followers_tiktok",
-      placeholder: "misal: 120000",
-    },
-    {
-      label: "Followers Twitter",
-      name: "followers_twitter",
-      placeholder: "misal: 8000",
-    },
-    { label: "Tinggi (cm)", name: "tinggi", placeholder: "misal: 180" },
-    { label: "Berat (kg)", name: "berat", placeholder: "misal: 71" },
-    { label: "Umur (tahun)", name: "umur", placeholder: "misal: 27" },
-  ];
-
-  return (
-    <div className="otp-modal-backdrop" onClick={onClose}>
-      <div className="otp-modal-box" onClick={(e) => e.stopPropagation()}>
-        <div className="otp-modal-header">
-          <h2 className="otp-modal-title">
-            {isEdit ? "Edit Talent" : "Tambah Talent"}
-          </h2>
-          <button className="otp-modal-close-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
-
-        {prefillLoading ? (
-          <div className="otp-prefill-loading">Memuat data talent...</div>
-        ) : (
-          <>
-            {/* Upload foto */}
-            <div className="otp-avatar-upload-wrap">
-              <div
-                className="otp-avatar-upload-square"
-                style={{
-                  backgroundImage: preview ? `url(${preview})` : "none",
-                }}
-              >
-                {!preview && <span className="otp-avatar-placeholder">📷</span>}
-              </div>
-              <label className="otp-avatar-change-btn">
-                {isEdit ? "Ganti Foto" : "Pilih Foto"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleImage}
-                />
-              </label>
-            </div>
-
-            <div className="otp-modal-fields">
-              {textFields.slice(0, 1).map((f) => (
-                <div className="otp-field-group" key={f.name}>
-                  <label className="otp-field-label">{f.label}</label>
-                  <input
-                    className="otp-field-input"
-                    name={f.name}
-                    value={form[f.name]}
-                    onChange={handleChange}
-                    placeholder={f.placeholder}
-                  />
+    return (
+        <div className="otp-modal-backdrop" onClick={onClose}>
+            <div className="otp-modal-box" onClick={(e) => e.stopPropagation()}>
+                <div className="otp-modal-header">
+                    <h2 className="otp-modal-title">
+                        {isEdit ? "Edit Talent" : "Tambah Talent"}
+                    </h2>
+                    <button className="otp-modal-close-btn" onClick={onClose}>
+                        ✕
+                    </button>
                 </div>
-              ))}
 
-              <div className="otp-field-group">
-                <label className="otp-field-label">Bio</label>
-                <textarea
-                  className="otp-field-input otp-field-textarea"
-                  name="bio"
-                  value={form.bio}
-                  onChange={handleChange}
-                  placeholder="Deskripsi singkat mengenai talent"
-                  rows={3}
-                />
-              </div>
+                {prefillLoading ? (
+                    <div className="otp-prefill-loading">
+                        Memuat data talent...
+                    </div>
+                ) : (
+                    <>
+                        {/* Upload foto */}
+                        <div className="otp-avatar-upload-wrap">
+                            <div
+                                className="otp-avatar-upload-square"
+                                style={{
+                                    backgroundImage: preview
+                                        ? `url(${preview})`
+                                        : "none",
+                                }}
+                            >
+                                {!preview && (
+                                    <span className="otp-avatar-placeholder">
+                                        📷
+                                    </span>
+                                )}
+                            </div>
+                            <label className="otp-avatar-change-btn">
+                                {isEdit ? "Ganti Foto" : "Pilih Foto"}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={handleImage}
+                                />
+                            </label>
+                        </div>
 
-              <div className="otp-field-row">
-                {textFields.slice(1, 4).map((f) => (
-                  <div className="otp-field-group" key={f.name}>
-                    <label className="otp-field-label">{f.label}</label>
-                    <input
-                      className="otp-field-input"
-                      name={f.name}
-                      value={form[f.name]}
-                      onChange={handleChange}
-                      placeholder={f.placeholder}
-                      inputMode="numeric"
-                    />
-                  </div>
-                ))}
-              </div>
+                        <div className="otp-modal-fields">
+                            {textFields.slice(0, 1).map((f) => (
+                                <div className="otp-field-group" key={f.name}>
+                                    <label className="otp-field-label">
+                                        {f.label}
+                                    </label>
+                                    <input
+                                        className="otp-field-input"
+                                        name={f.name}
+                                        value={form[f.name]}
+                                        onChange={handleChange}
+                                        placeholder={f.placeholder}
+                                    />
+                                </div>
+                            ))}
 
-              <div className="otp-field-row">
-                {textFields.slice(4, 7).map((f) => (
-                  <div className="otp-field-group" key={f.name}>
-                    <label className="otp-field-label">{f.label}</label>
-                    <input
-                      className="otp-field-input"
-                      name={f.name}
-                      value={form[f.name]}
-                      onChange={handleChange}
-                      placeholder={f.placeholder}
-                      inputMode="numeric"
-                    />
-                  </div>
-                ))}
-              </div>
+                            <div className="otp-field-group">
+                                <label className="otp-field-label">Bio</label>
+                                <textarea
+                                    className="otp-field-input otp-field-textarea"
+                                    name="bio"
+                                    value={form.bio}
+                                    onChange={handleChange}
+                                    placeholder="Deskripsi singkat mengenai talent"
+                                    rows={3}
+                                />
+                            </div>
+
+                            <div className="otp-field-row">
+                                {textFields.slice(1, 4).map((f) => (
+                                    <div
+                                        className="otp-field-group"
+                                        key={f.name}
+                                    >
+                                        <label className="otp-field-label">
+                                            {f.label}
+                                        </label>
+                                        <input
+                                            className="otp-field-input"
+                                            name={f.name}
+                                            value={form[f.name]}
+                                            onChange={handleChange}
+                                            placeholder={f.placeholder}
+                                            inputMode="numeric"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="otp-field-row">
+                                {textFields.slice(4, 7).map((f) => (
+                                    <div
+                                        className="otp-field-group"
+                                        key={f.name}
+                                    >
+                                        <label className="otp-field-label">
+                                            {f.label}
+                                        </label>
+                                        <input
+                                            className="otp-field-input"
+                                            name={f.name}
+                                            value={form[f.name]}
+                                            onChange={handleChange}
+                                            placeholder={f.placeholder}
+                                            inputMode="numeric"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {error && <p className="otp-modal-error">{error}</p>}
+
+                        <div className="otp-modal-actions">
+                            <button
+                                className="otp-btn-cancel"
+                                onClick={onClose}
+                                disabled={loading}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                className="otp-btn-save"
+                                onClick={handleSubmit}
+                                disabled={loading}
+                            >
+                                {loading
+                                    ? "Menyimpan..."
+                                    : isEdit
+                                      ? "Simpan Perubahan"
+                                      : "Tambah Talent"}
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
-
-            {error && <p className="otp-modal-error">{error}</p>}
-
-            <div className="otp-modal-actions">
-              <button
-                className="otp-btn-cancel"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Batal
-              </button>
-              <button
-                className="otp-btn-save"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading
-                  ? "Menyimpan..."
-                  : isEdit
-                    ? "Simpan Perubahan"
-                    : "Tambah Talent"}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 // ── Konfirmasi Hapus ──────────────────────────────────────────────────────────
 const DeleteConfirm = ({ talent, desc, onClose, onDeleted }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-  const handleDelete = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(
-        `${API_URL}/delete-official-talent/${talent.id}`,
-        {
-          method: "DELETE",
-        },
-      );
-      if (!res.ok) throw new Error("Gagal menghapus talent");
-      onDeleted();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleDelete = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const res = await fetch(
+                `${API_URL}/delete-official-talent/${talent.id}`,
+                {
+                    method: "DELETE",
+                },
+            );
+            if (!res.ok) throw new Error("Gagal menghapus talent");
+            onDeleted();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <div className="otp-modal-backdrop" onClick={onClose}>
-      <div
-        className="otp-modal-box otp-confirm-box"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="otp-confirm-icon">🗑️</p>
-        <h3 className="otp-confirm-title">Hapus Talent?</h3>
-        <p className="otp-confirm-desc">
-          <strong>{desc?.nama?.trim() || `Talent #${talent.id}`}</strong> akan
-          dihapus permanen beserta seluruh detailnya dan tidak bisa
-          dikembalikan.
-        </p>
-        {error && <p className="otp-modal-error">{error}</p>}
-        <div className="otp-modal-actions">
-          <button
-            className="otp-btn-cancel"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Batal
-          </button>
-          <button
-            className="otp-btn-delete"
-            onClick={handleDelete}
-            disabled={loading}
-          >
-            {loading ? "Menghapus..." : "Ya, Hapus"}
-          </button>
+    return (
+        <div className="otp-modal-backdrop" onClick={onClose}>
+            <div
+                className="otp-modal-box otp-confirm-box"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <p className="otp-confirm-icon">🗑️</p>
+                <h3 className="otp-confirm-title">Hapus Talent?</h3>
+                <p className="otp-confirm-desc">
+                    <strong>
+                        {desc?.nama?.trim() || `Talent #${talent.id}`}
+                    </strong>{" "}
+                    akan dihapus permanen beserta seluruh detailnya dan tidak
+                    bisa dikembalikan.
+                </p>
+                {error && <p className="otp-modal-error">{error}</p>}
+                <div className="otp-modal-actions">
+                    <button
+                        className="otp-btn-cancel"
+                        onClick={onClose}
+                        disabled={loading}
+                    >
+                        Batal
+                    </button>
+                    <button
+                        className="otp-btn-delete"
+                        onClick={handleDelete}
+                        disabled={loading}
+                    >
+                        {loading ? "Menghapus..." : "Ya, Hapus"}
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 // ── Talent Card (admin grid) ──────────────────────────────────────────────────
 const AdminTalentCard = ({ talent, desc, index, onEdit, onDelete }) => {
-  const [imgError, setImgError] = useState(false);
-  const photo = `${BASE_URL}`;
-  const showFallback = !photo || imgError;
-  const name = desc?.nama?.trim();
+    const [imgError, setImgError] = useState(false);
+    // FIX: sebelumnya `photo` hanya berisi BASE_URL saja (tanpa path gambar),
+    // sehingga <img> selalu gagal load dan jatuh ke fallback biru + emoji.
+    // Sekarang digabungkan dengan path gambar talent, sama seperti di TalentModal.
+    const photo = talent?.image_url ? `${BASE_URL}${talent.image_url}` : null;
+    const showFallback = !photo || imgError;
+    const name = desc?.nama?.trim();
 
-  return (
-    <div className="otp-card" style={{ animationDelay: `${index * 50}ms` }}>
-      <div className="otp-card-photo-wrap">
-        {showFallback ? (
-          <div className="otp-card-fallback">🧑</div>
-        ) : (
-          <img
-            src={photo}
-            alt={name || "Talent"}
-            className="otp-card-img"
-            onError={() => setImgError(true)}
-          />
-        )}
-      </div>
+    return (
+        <div className="otp-card" style={{ animationDelay: `${index * 50}ms` }}>
+            <div className="otp-card-photo-wrap">
+                {showFallback ? (
+                    <div className="otp-card-fallback">🧑</div>
+                ) : (
+                    <img
+                        src={photo}
+                        alt={name || "Talent"}
+                        className="otp-card-img"
+                        onError={() => setImgError(true)}
+                    />
+                )}
+            </div>
 
-      <div className="otp-card-body">
-        <p className={`otp-card-name ${!name ? "otp-card-name-empty" : ""}`}>
-          {name || "Belum diisi"}
-        </p>
-        {desc &&
-        (desc.followers_ig ||
-          desc.followers_tiktok ||
-          desc.followers_twitter) ? (
-          <p className="otp-card-sub">
-            IG {desc.followers_ig || 0} · TT {desc.followers_tiktok || 0} · TW{" "}
-            {desc.followers_twitter || 0}
-          </p>
-        ) : (
-          <p className="otp-card-sub otp-card-sub-empty">
-            Detail belum lengkap
-          </p>
-        )}
-      </div>
+            <div className="otp-card-body">
+                <p
+                    className={`otp-card-name ${!name ? "otp-card-name-empty" : ""}`}
+                >
+                    {name || "Belum diisi"}
+                </p>
+                {desc &&
+                (desc.followers_ig ||
+                    desc.followers_tiktok ||
+                    desc.followers_twitter) ? (
+                    <p className="otp-card-sub">
+                        IG {desc.followers_ig || 0} · TT{" "}
+                        {desc.followers_tiktok || 0} · TW{" "}
+                        {desc.followers_twitter || 0}
+                    </p>
+                ) : (
+                    <p className="otp-card-sub otp-card-sub-empty">
+                        Detail belum lengkap
+                    </p>
+                )}
+            </div>
 
-      <div className="otp-card-actions">
-        <button className="otp-action-btn" onClick={() => onEdit(talent)}>
-          Edit
-        </button>
-        <button
-          className="otp-action-btn otp-action-del"
-          onClick={() => onDelete(talent)}
-        >
-          Hapus
-        </button>
-      </div>
-    </div>
-  );
+            <div className="otp-card-actions">
+                <button
+                    className="otp-action-btn"
+                    onClick={() => onEdit(talent)}
+                >
+                    Edit
+                </button>
+                <button
+                    className="otp-action-btn otp-action-del"
+                    onClick={() => onDelete(talent)}
+                >
+                    Hapus
+                </button>
+            </div>
+        </div>
+    );
 };
 
 // ── Panel Utama ────────────────────────────────────────────────────────────────
 const OfficialTalentPanel = () => {
-  const [talents, setTalents] = useState([]);
-  const [descMap, setDescMap] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [modal, setModal] = useState(null);
+    const [talents, setTalents] = useState([]);
+    const [descMap, setDescMap] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [modal, setModal] = useState(null);
 
-  const fetchTalents = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/load-official-talent`, {
-        method: "GET",
-      });
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
-      setTalents(list);
-
-      // Ambil detail masing-masing talent (nama dkk) untuk ditampilkan di grid admin
-      const entries = await Promise.all(
-        list.map(async (t) => {
-          try {
-            const r = await fetch(
-              `${API_URL}/load-official-talent-desc/${t.id}`,
-              {
+    const fetchTalents = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/load-official-talent`, {
                 method: "GET",
-              },
+            });
+            const data = await res.json();
+            const list = Array.isArray(data) ? data : [];
+            setTalents(list);
+
+            // Ambil detail masing-masing talent (nama dkk) untuk ditampilkan di grid admin
+            const entries = await Promise.all(
+                list.map(async (t) => {
+                    try {
+                        const r = await fetch(
+                            `${API_URL}/load-official-talent-desc/${t.id}`,
+                            {
+                                method: "GET",
+                            },
+                        );
+                        const d = await r.json();
+                        return [t.id, Array.isArray(d) ? d[0] : d];
+                    } catch {
+                        return [t.id, null];
+                    }
+                }),
             );
-            const d = await r.json();
-            return [t.id, Array.isArray(d) ? d[0] : d];
-          } catch {
-            return [t.id, null];
-          }
-        }),
-      );
-      setDescMap(Object.fromEntries(entries));
-    } catch (err) {
-      console.error("Gagal fetch official talent:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+            setDescMap(Object.fromEntries(entries));
+        } catch (err) {
+            console.error("Gagal fetch official talent:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  useEffect(() => {
-    fetchTalents();
-  }, []);
+    useEffect(() => {
+        fetchTalents();
+    }, []);
 
-  const handleSaved = () => {
-    setModal(null);
-    fetchTalents();
-  };
-  const handleDeleted = () => {
-    setModal(null);
-    fetchTalents();
-  };
+    const handleSaved = () => {
+        setModal(null);
+        fetchTalents();
+    };
+    const handleDeleted = () => {
+        setModal(null);
+        fetchTalents();
+    };
 
-  const filtered = talents.filter((t) => {
-    const name = descMap[t.id]?.nama || "";
-    return name.toLowerCase().includes(search.toLowerCase());
-  });
+    const filtered = talents.filter((t) => {
+        const name = descMap[t.id]?.nama || "";
+        return name.toLowerCase().includes(search.toLowerCase());
+    });
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
         :root {
@@ -524,8 +559,21 @@ const OfficialTalentPanel = () => {
         .otp-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(26,39,68,0.12); }
         @keyframes otpCardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-        .otp-card-photo-wrap { width: 100%; aspect-ratio: 1 / 1; background: #f0f0f0; }
-        .otp-card-img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+        .otp-card-photo-wrap {
+          width: 100%;
+          height: 220px;
+          min-height: 220px;
+          max-height: 220px;
+          overflow: hidden;
+          background: #f0f0f0;
+        }
+        .otp-card-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center center;
+          display: block;
+        }
         .otp-card-fallback {
           width: 100%; height: 100%; background: linear-gradient(135deg, var(--navy), var(--accent));
           display: flex; align-items: center; justify-content: center; font-size: 2rem;
@@ -556,7 +604,7 @@ const OfficialTalentPanel = () => {
 
         .otp-skeleton-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
         .otp-skel { border-radius: 8px; background: linear-gradient(90deg, #f1f5f9 25%, #e9edf4 50%, #f1f5f9 75%); background-size: 200% 100%; animation: otpShimmer 1.4s infinite; }
-        .otp-skel-photo { width: 100%; aspect-ratio: 1 / 1; border-radius: 0; }
+        .otp-skel-photo { width: 100%; height: 220px; border-radius: 0; }
         @keyframes otpShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         /* ── Modal ── */
@@ -644,126 +692,137 @@ const OfficialTalentPanel = () => {
         @media (max-width: 600px) {
           .otp-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
           .otp-stats { grid-template-columns: repeat(1, 1fr); }
+          .otp-card-photo-wrap, .otp-skel-photo { height: 150px; min-height: 150px; max-height: 150px; }
         }
       `}</style>
 
-      <div className="otp-wrap">
-        {/* Header */}
-        <div className="otp-header">
-          <div>
-            <h1 className="otp-page-title">Official Talent</h1>
-            <p className="otp-page-sub">
-              Kelola foto & detail Official Talent Hainick
-            </p>
-          </div>
-          <button
-            className="otp-add-btn"
-            onClick={() => setModal({ mode: "add" })}
-          >
-            + Tambah Talent
-          </button>
-        </div>
-
-        {/* Stats */}
-        <div className="otp-stats">
-          <div className="otp-stat-card">
-            <span className="otp-stat-label">Total</span>
-            <span className="otp-stat-value">{talents.length}</span>
-            <span className="otp-stat-hint">
-              {talents.length > 10
-                ? "Publik akan menampilkan carousel geser"
-                : "talent terdaftar"}
-            </span>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="otp-search-row">
-          <input
-            className="otp-search"
-            type="search"
-            placeholder="Cari nama talent..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {!loading && (
-            <span className="otp-count-label">
-              {filtered.length} dari {talents.length} talent
-            </span>
-          )}
-        </div>
-
-        {/* Grid */}
-        <div className="otp-grid">
-          {loading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <div className="otp-skeleton-card" key={i}>
-                <div className="otp-skel otp-skel-photo" />
-                <div style={{ padding: "0.85rem 0.9rem" }}>
-                  <div
-                    className="otp-skel"
-                    style={{ width: "60%", height: 12, marginBottom: 6 }}
-                  />
-                  <div
-                    className="otp-skel"
-                    style={{ width: "80%", height: 10 }}
-                  />
+            <div className="otp-wrap">
+                {/* Header */}
+                <div className="otp-header">
+                    <div>
+                        <h1 className="otp-page-title">Official Talent</h1>
+                        <p className="otp-page-sub">
+                            Kelola foto & detail Official Talent Hainick
+                        </p>
+                    </div>
+                    <button
+                        className="otp-add-btn"
+                        onClick={() => setModal({ mode: "add" })}
+                    >
+                        + Tambah Talent
+                    </button>
                 </div>
-              </div>
-            ))
-          ) : filtered.length === 0 ? (
-            <div className="otp-empty-state">
-              <span className="otp-empty-icon">🎬</span>
-              <p className="otp-empty-title">
-                {search ? "Talent tidak ditemukan" : "Belum ada talent"}
-              </p>
-              <p className="otp-empty-sub">
-                {search
-                  ? `Tidak ada hasil untuk "${search}"`
-                  : "Klik + Tambah Talent untuk mulai"}
-              </p>
-            </div>
-          ) : (
-            filtered.map((t, i) => (
-              <AdminTalentCard
-                key={t.id}
-                talent={t}
-                desc={descMap[t.id]}
-                index={i}
-                onEdit={(tal) => setModal({ mode: "edit", talent: tal })}
-                onDelete={(tal) => setModal({ mode: "delete", talent: tal })}
-              />
-            ))
-          )}
-        </div>
-      </div>
 
-      {/* Modals */}
-      {modal?.mode === "add" && (
-        <TalentModal
-          mode="add"
-          onClose={() => setModal(null)}
-          onSaved={handleSaved}
-        />
-      )}
-      {modal?.mode === "edit" && (
-        <TalentModal
-          mode="edit"
-          talent={modal.talent}
-          onClose={() => setModal(null)}
-          onSaved={handleSaved}
-        />
-      )}
-      {modal?.mode === "delete" && (
-        <DeleteConfirm
-          talent={modal.talent}
-          desc={descMap[modal.talent.id]}
-          onClose={() => setModal(null)}
-          onDeleted={handleDeleted}
-        />
-      )}
-    </>
-  );
+                {/* Stats */}
+                <div className="otp-stats">
+                    <div className="otp-stat-card">
+                        <span className="otp-stat-label">Total</span>
+                        <span className="otp-stat-value">{talents.length}</span>
+                        <span className="otp-stat-hint">
+                            {talents.length > 10
+                                ? "Publik akan menampilkan carousel geser"
+                                : "talent terdaftar"}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Search */}
+                <div className="otp-search-row">
+                    <input
+                        className="otp-search"
+                        type="search"
+                        placeholder="Cari nama talent..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    {!loading && (
+                        <span className="otp-count-label">
+                            {filtered.length} dari {talents.length} talent
+                        </span>
+                    )}
+                </div>
+
+                {/* Grid */}
+                <div className="otp-grid">
+                    {loading ? (
+                        Array.from({ length: 6 }).map((_, i) => (
+                            <div className="otp-skeleton-card" key={i}>
+                                <div className="otp-skel otp-skel-photo" />
+                                <div style={{ padding: "0.85rem 0.9rem" }}>
+                                    <div
+                                        className="otp-skel"
+                                        style={{
+                                            width: "60%",
+                                            height: 12,
+                                            marginBottom: 6,
+                                        }}
+                                    />
+                                    <div
+                                        className="otp-skel"
+                                        style={{ width: "80%", height: 10 }}
+                                    />
+                                </div>
+                            </div>
+                        ))
+                    ) : filtered.length === 0 ? (
+                        <div className="otp-empty-state">
+                            <span className="otp-empty-icon">🎬</span>
+                            <p className="otp-empty-title">
+                                {search
+                                    ? "Talent tidak ditemukan"
+                                    : "Belum ada talent"}
+                            </p>
+                            <p className="otp-empty-sub">
+                                {search
+                                    ? `Tidak ada hasil untuk "${search}"`
+                                    : "Klik + Tambah Talent untuk mulai"}
+                            </p>
+                        </div>
+                    ) : (
+                        filtered.map((t, i) => (
+                            <AdminTalentCard
+                                key={t.id}
+                                talent={t}
+                                desc={descMap[t.id]}
+                                index={i}
+                                onEdit={(tal) =>
+                                    setModal({ mode: "edit", talent: tal })
+                                }
+                                onDelete={(tal) =>
+                                    setModal({ mode: "delete", talent: tal })
+                                }
+                            />
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Modals */}
+            {modal?.mode === "add" && (
+                <TalentModal
+                    mode="add"
+                    onClose={() => setModal(null)}
+                    onSaved={handleSaved}
+                />
+            )}
+            {modal?.mode === "edit" && (
+                <TalentModal
+                    mode="edit"
+                    talent={modal.talent}
+                    onClose={() => setModal(null)}
+                    onSaved={handleSaved}
+                />
+            )}
+            {modal?.mode === "delete" && (
+                <DeleteConfirm
+                    talent={modal.talent}
+                    desc={descMap[modal.talent.id]}
+                    onClose={() => setModal(null)}
+                    onDeleted={handleDeleted}
+                />
+            )}
+        </>
+    );
 };
 
 export default OfficialTalentPanel;

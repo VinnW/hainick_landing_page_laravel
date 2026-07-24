@@ -1,199 +1,218 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "../../../utils/api";
+import { API_URL, BASE_URL } from "../../../utils/api";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const IGIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-  </svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    </svg>
 );
 
 const TikTokIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.75a4.85 4.85 0 01-1-.06z" />
-  </svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.75a4.85 4.85 0 01-1-.06z" />
+    </svg>
 );
 
 const XIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
 );
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const formatFollowers = (n) => {
-  const num = parseInt(n, 10);
-  if (isNaN(num) || num === 0) return null;
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
-  if (num >= 1_000) return Math.round(num / 1_000) + "K";
-  return String(num);
+    const num = parseInt(n, 10);
+    if (isNaN(num) || num === 0) return null;
+    if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+    if (num >= 1_000) return Math.round(num / 1_000) + "K";
+    return String(num);
 };
 
 // ── Mapping: API response → CreatorPlusSection format ──────────────────────────────
 // Menangani dua kemungkinan nama field: followers_ig DAN followers_instagram
 const mapCreatorToTalent = (creator) => {
-  // Debug: uncomment baris ini jika card masih tidak muncul
-  // console.log("Creator fields:", Object.keys(creator), creator);
+    // Debug: uncomment baris ini jika card masih tidak muncul
+    // console.log("Creator fields:", Object.keys(creator), creator);
 
-  const igFollowers = creator.followers_instagram ?? creator.followers_ig ?? 0;
-  const ttFollowers = creator.followers_tiktok ?? 0;
-  const xFollowers = creator.followers_x ?? 0;
+    const igFollowers =
+        creator.followers_instagram ?? creator.followers_ig ?? 0;
+    const ttFollowers = creator.followers_tiktok ?? 0;
+    const xFollowers = creator.followers_x ?? 0;
 
-  const socials = {};
+    const socials = {};
 
-  if (igFollowers && igFollowers !== "0") {
-    socials.instagram = {
-      url: creator.url_instagram || "https://instagram.com/",
-      followers: String(igFollowers),
+    if (igFollowers && igFollowers !== "0") {
+        socials.instagram = {
+            url: creator.url_instagram || "https://instagram.com/",
+            followers: String(igFollowers),
+        };
+    }
+    if (ttFollowers && ttFollowers !== "0") {
+        socials.tiktok = {
+            url: creator.url_tiktok || "https://tiktok.com/",
+            followers: String(ttFollowers),
+        };
+    }
+    if (xFollowers && xFollowers !== "0") {
+        socials.x = {
+            url: creator.url_x || "https://x.com/",
+            followers: String(xFollowers),
+        };
+    }
+
+    return {
+        id: creator.id,
+        name: creator.name,
+        photo: creator.profile_image
+            ? `${BASE_URL}${creator.profile_image}`
+            : null,
+        categories: creator.roles
+            ? creator.roles
+                  .split(",")
+                  .map((r) => r.trim())
+                  .filter(Boolean)
+            : [],
+        socials,
     };
-  }
-  if (ttFollowers && ttFollowers !== "0") {
-    socials.tiktok = {
-      url: creator.url_tiktok || "https://tiktok.com/",
-      followers: String(ttFollowers),
-    };
-  }
-  if (xFollowers && xFollowers !== "0") {
-    socials.x = {
-      url: creator.url_x || "https://x.com/",
-      followers: String(xFollowers),
-    };
-  }
-
-  return {
-    id: creator.id,
-    name: creator.name,
-    photo: creator.profile_image ? `${API_URL}${creator.profile_image}` : null,
-    categories: creator.roles
-      ? creator.roles
-          .split(",")
-          .map((r) => r.trim())
-          .filter(Boolean)
-      : [],
-    socials,
-  };
 };
 
 // ── Social config ─────────────────────────────────────────────────────────────
 const SOCIAL_CONFIG = [
-  { key: "instagram", icon: <IGIcon /> },
-  { key: "tiktok", icon: <TikTokIcon /> },
-  { key: "x", icon: <XIcon /> },
+    { key: "instagram", icon: <IGIcon /> },
+    { key: "tiktok", icon: <TikTokIcon /> },
+    { key: "x", icon: <XIcon /> },
 ];
 
 // ── TalentCard ─────────────────────────────────────────────────────────────────
 function TalentCard({ talent, index }) {
-  const [imgError, setImgError] = useState(false);
-  const showFallback = !talent.photo || imgError;
+    const [imgError, setImgError] = useState(false);
+    const showFallback = !talent.photo || imgError;
 
-  return (
-    <div className="tc-card" style={{ animationDelay: `${index * 60}ms` }}>
-      {/* Foto */}
-      <div className="tc-photo-wrap">
-        {showFallback ? (
-          <div className="tc-photo-fallback">
-            <span>{talent.name?.[0]?.toUpperCase() || "?"}</span>
-          </div>
-        ) : (
-          <img
-            src={talent.photo}
-            alt={talent.name}
-            className="tc-photo"
-            onError={() => setImgError(true)}
-          />
-        )}
-      </div>
+    return (
+        <div className="tc-card" style={{ animationDelay: `${index * 60}ms` }}>
+            {/* Foto */}
+            <div className="tc-photo-wrap">
+                {showFallback ? (
+                    <div className="tc-photo-fallback">
+                        <span>{talent.name?.[0]?.toUpperCase() || "?"}</span>
+                    </div>
+                ) : (
+                    <img
+                        src={talent.photo}
+                        alt={talent.name}
+                        className="tc-photo"
+                        onError={() => setImgError(true)}
+                    />
+                )}
+            </div>
 
-      {/* Info */}
-      <div className="tc-body">
-        <h3 className="tc-name">{talent.name}</h3>
+            {/* Info */}
+            <div className="tc-body">
+                <h3 className="tc-name">{talent.name}</h3>
 
-        {/* Socials */}
-        {Object.keys(talent.socials).length > 0 && (
-          <div className="tc-socials">
-            {SOCIAL_CONFIG.filter((s) => talent.socials[s.key]).map((s) => {
-              const count = formatFollowers(talent.socials[s.key].followers);
-              if (!count) return null;
-              return (
-                <a
-                  key={s.key}
-                  href={talent.socials[s.key].url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="tc-social-item"
-                >
-                  <span className="tc-social-icon">{s.icon}</span>
-                  <span className="tc-social-count">{count}</span>
-                </a>
-              );
-            })}
-          </div>
-        )}
+                {/* Socials */}
+                {Object.keys(talent.socials).length > 0 && (
+                    <div className="tc-socials">
+                        {SOCIAL_CONFIG.filter((s) => talent.socials[s.key]).map(
+                            (s) => {
+                                const count = formatFollowers(
+                                    talent.socials[s.key].followers,
+                                );
+                                if (!count) return null;
+                                return (
+                                    <a
+                                        key={s.key}
+                                        href={talent.socials[s.key].url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="tc-social-item"
+                                    >
+                                        <span className="tc-social-icon">
+                                            {s.icon}
+                                        </span>
+                                        <span className="tc-social-count">
+                                            {count}
+                                        </span>
+                                    </a>
+                                );
+                            },
+                        )}
+                    </div>
+                )}
 
-        {/* Categories */}
-        {talent.categories.length > 0 && (
-          <div className="tc-cats">
-            {talent.categories.map((c) => (
-              <span key={c} className="tc-cat">
-                {c}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                {/* Categories */}
+                {talent.categories.length > 0 && (
+                    <div className="tc-cats">
+                        {talent.categories.map((c) => (
+                            <span key={c} className="tc-cat">
+                                {c}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 function SkeletonCard() {
-  return (
-    <div className="tc-card tc-skeleton">
-      <div className="tc-photo-wrap skel-photo" />
-      <div className="tc-body">
-        <div
-          className="skel-line"
-          style={{ width: "65%", height: 13, marginBottom: 10 }}
-        />
-        <div
-          className="skel-line"
-          style={{ width: "45%", height: 11, marginBottom: 8 }}
-        />
-        <div style={{ display: "flex", gap: 6 }}>
-          <div className="skel-line" style={{ width: 40, height: 18 }} />
-          <div className="skel-line" style={{ width: 40, height: 18 }} />
+    return (
+        <div className="tc-card tc-skeleton">
+            <div className="tc-photo-wrap skel-photo" />
+            <div className="tc-body">
+                <div
+                    className="skel-line"
+                    style={{ width: "65%", height: 13, marginBottom: 10 }}
+                />
+                <div
+                    className="skel-line"
+                    style={{ width: "45%", height: 11, marginBottom: 8 }}
+                />
+                <div style={{ display: "flex", gap: 6 }}>
+                    <div
+                        className="skel-line"
+                        style={{ width: 40, height: 18 }}
+                    />
+                    <div
+                        className="skel-line"
+                        style={{ width: 40, height: 18 }}
+                    />
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 // ── CreatorPlusSection ──────────────────────────────────────────────────────────────
 export default function CreatorPlusSection() {
-  const [talents, setTalents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [talents, setTalents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetch(`${API_URL}/creators`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        const mapped = Array.isArray(data) ? data.map(mapCreatorToTalent) : [];
-        setTalents(mapped);
-      })
-      .catch((err) => {
-        console.error("Gagal fetch creators:", err);
-        setError(err.message);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    useEffect(() => {
+        fetch(`${API_URL}/creators`)
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then((data) => {
+                const mapped = Array.isArray(data)
+                    ? data.map(mapCreatorToTalent)
+                    : [];
+                setTalents(mapped);
+            })
+            .catch((err) => {
+                console.error("Gagal fetch creators:", err);
+                setError(err.message);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
         .ts-root {
@@ -352,27 +371,29 @@ export default function CreatorPlusSection() {
         }
       `}</style>
 
-      <section
-        id="creatorPlus"
-        className="ts-root"
-        style={{ scrollMarginTop: "80px" }}
-      >
-        <h2 className="ts-title">Creator+</h2>
+            <section
+                id="creatorPlus"
+                className="ts-root"
+                style={{ scrollMarginTop: "80px" }}
+            >
+                <h2 className="ts-title">Creator+</h2>
 
-        {error ? (
-          <p className="ts-error">Gagal memuat data talent: {error}</p>
-        ) : (
-          <div className="ts-grid">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))
-              : talents.map((t, i) => (
-                  <TalentCard key={t.id} talent={t} index={i} />
-                ))}
-          </div>
-        )}
-      </section>
-    </>
-  );
+                {error ? (
+                    <p className="ts-error">
+                        Gagal memuat data talent: {error}
+                    </p>
+                ) : (
+                    <div className="ts-grid">
+                        {loading
+                            ? Array.from({ length: 6 }).map((_, i) => (
+                                  <SkeletonCard key={i} />
+                              ))
+                            : talents.map((t, i) => (
+                                  <TalentCard key={t.id} talent={t} index={i} />
+                              ))}
+                    </div>
+                )}
+            </section>
+        </>
+    );
 }

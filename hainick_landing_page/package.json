@@ -1,7 +1,7 @@
 {
   "name": "hainick_landing_page",
   "private": true,
-  "type": "module", 
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build"

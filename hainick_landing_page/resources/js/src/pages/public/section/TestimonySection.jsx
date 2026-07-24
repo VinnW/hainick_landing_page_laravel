@@ -1,20 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import { API_URL } from "../../../utils/api";
+import { API_URL, BASE_URL } from "../../../utils/api";
 
 const fmtPhoto = (url) =>
-  url ? (url.startsWith("http") ? url : `${API_URL}${url}`) : null;
+    url ? (url.startsWith("http") ? url : `${BASE_URL}${url}`) : null;
 
 // ─── Modal Component ───────────────────────────────────────────────────────
 function Modal({ title, onClose, children }) {
-  useEffect(() => {
-    const esc = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
-  }, [onClose]);
+    useEffect(() => {
+        const esc = (e) => e.key === "Escape" && onClose();
+        window.addEventListener("keydown", esc);
+        return () => window.removeEventListener("keydown", esc);
+    }, [onClose]);
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         .modal-backdrop {
           position: fixed; inset: 0; z-index: 999;
           background: rgba(10,10,20,0.45);
@@ -93,222 +93,222 @@ function Modal({ title, onClose, children }) {
         .btn-save:hover { background: #263660; transform: translateY(-1px); }
         .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
       `}</style>
-      <div
-        className="modal-backdrop"
-        onClick={(e) => e.target === e.currentTarget && onClose()}
-      >
-        <div className="modal-box">
-          <div className="modal-head">
-            <span className="modal-title">{title}</span>
-            <button className="modal-close" onClick={onClose}>
-              ✕
-            </button>
-          </div>
-          {children}
-        </div>
-      </div>
-    </>
-  );
+            <div
+                className="modal-backdrop"
+                onClick={(e) => e.target === e.currentTarget && onClose()}
+            >
+                <div className="modal-box">
+                    <div className="modal-head">
+                        <span className="modal-title">{title}</span>
+                        <button className="modal-close" onClick={onClose}>
+                            ✕
+                        </button>
+                    </div>
+                    {children}
+                </div>
+            </div>
+        </>
+    );
 }
 
 // ─── Admin Panel Component ─────────────────────────────────────────────────
 export const TestimonyPanel = ({ onDataChange }) => {
-  // ── Testimony state ──
-  const [data, setData] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(null);
-  const [selected, setSelected] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
+    // ── Testimony state ──
+    const [data, setData] = useState([]);
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [modal, setModal] = useState(null);
+    const [selected, setSelected] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [toast, setToast] = useState(null);
 
-  const [fName, setFName] = useState("");
-  const [fText, setFText] = useState("");
-  const [fFile, setFFile] = useState(null);
-  const [fPreview, setFPreview] = useState(null);
-  const fileRef = useRef();
+    const [fName, setFName] = useState("");
+    const [fText, setFText] = useState("");
+    const [fFile, setFFile] = useState(null);
+    const [fPreview, setFPreview] = useState(null);
+    const fileRef = useRef();
 
-  // ── Logo state ──
-  const [logos, setLogos] = useState([]);
-  const [logoLoading, setLogoLoading] = useState(true);
-  const [logoModal, setLogoModal] = useState(false);
-  const [logoFile, setLogoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [logoSaving, setLogoSaving] = useState(false);
-  const logoFileRef = useRef();
+    // ── Logo state ──
+    const [logos, setLogos] = useState([]);
+    const [logoLoading, setLogoLoading] = useState(true);
+    const [logoModal, setLogoModal] = useState(false);
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
+    const [logoSaving, setLogoSaving] = useState(false);
+    const logoFileRef = useRef();
 
-  // ── Active tab ──
-  const [activeTab, setActiveTab] = useState("testimony"); // "testimony" | "logo"
+    // ── Active tab ──
+    const [activeTab, setActiveTab] = useState("testimony"); // "testimony" | "logo"
 
-  // ── Fetch testimony ──
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/testimonials`);
-      const json = await res.json();
-      const cleanData = Array.isArray(json) ? json : [];
-      setData(cleanData);
-      if (onDataChange) onDataChange();
-    } catch {
-      showToast("Gagal memuat data.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // ── Fetch testimony ──
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/testimonials`);
+            const json = await res.json();
+            const cleanData = Array.isArray(json) ? json : [];
+            setData(cleanData);
+            if (onDataChange) onDataChange();
+        } catch {
+            showToast("Gagal memuat data.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  // ── Fetch logos ──
-  const fetchLogos = async () => {
-    setLogoLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/load-logo`, { method: "POST" });
-      const json = await res.json();
-      setLogos(Array.isArray(json) ? json : []);
-    } catch {
-      showToast("Gagal memuat logo.", "error");
-    } finally {
-      setLogoLoading(false);
-    }
-  };
+    // ── Fetch logos ──
+    const fetchLogos = async () => {
+        setLogoLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/load-logo`, { method: "POST" });
+            const json = await res.json();
+            setLogos(Array.isArray(json) ? json : []);
+        } catch {
+            showToast("Gagal memuat logo.", "error");
+        } finally {
+            setLogoLoading(false);
+        }
+    };
 
-  useEffect(() => {
-    fetchData();
-    fetchLogos();
-  }, []);
+    useEffect(() => {
+        fetchData();
+        fetchLogos();
+    }, []);
 
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
-  // ── Testimony handlers ──
-  const openAdd = () => {
-    setSelected(null);
-    setFName("");
-    setFText("");
-    setFFile(null);
-    setFPreview(null);
-    setModal("add");
-  };
-  const openEdit = (row) => {
-    setSelected(row);
-    setFName(row.name || "");
-    setFText(row.testimonial || "");
-    setFFile(null);
-    setFPreview(fmtPhoto(row.profile_image));
-    setModal("edit");
-  };
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFFile(f);
-    setFPreview(URL.createObjectURL(f));
-  };
-  const handleSave = async () => {
-    if (!fName.trim() || !fText.trim()) {
-      showToast("Nama dan testimoni wajib diisi.", "error");
-      return;
-    }
-    setSaving(true);
-    const fd = new FormData();
-    fd.append("name", fName.trim());
-    fd.append("testimonial", fText.trim());
-    if (fFile) fd.append("profile_image", fFile);
-    try {
-      const url =
-        modal === "add"
-          ? `${API_URL}/create-testimonials`
-          : `${API_URL}/update-testimonials/${selected.id}`;
-      const method = modal === "add" ? "POST" : "PUT";
-      const res = await fetch(url, { method, body: fd });
-      if (!res.ok) throw new Error();
-      showToast(
-        modal === "add"
-          ? "Testimony berhasil ditambahkan!"
-          : "Testimony berhasil diperbarui!",
-      );
-      setModal(null);
-      fetchData();
-    } catch {
-      showToast("Gagal menyimpan data.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-  const handleDelete = async (id) => {
-    if (!window.confirm("Yakin hapus testimony ini?")) return;
-    try {
-      const res = await fetch(`${API_URL}/delete-testimonials/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error();
-      showToast("Testimony berhasil dihapus.");
-      fetchData();
-    } catch {
-      showToast("Gagal menghapus data.", "error");
-    }
-  };
+    // ── Testimony handlers ──
+    const openAdd = () => {
+        setSelected(null);
+        setFName("");
+        setFText("");
+        setFFile(null);
+        setFPreview(null);
+        setModal("add");
+    };
+    const openEdit = (row) => {
+        setSelected(row);
+        setFName(row.name || "");
+        setFText(row.testimonial || "");
+        setFFile(null);
+        setFPreview(fmtPhoto(row.profile_image));
+        setModal("edit");
+    };
+    const handleFile = (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        setFFile(f);
+        setFPreview(URL.createObjectURL(f));
+    };
+    const handleSave = async () => {
+        if (!fName.trim() || !fText.trim()) {
+            showToast("Nama dan testimoni wajib diisi.", "error");
+            return;
+        }
+        setSaving(true);
+        const fd = new FormData();
+        fd.append("name", fName.trim());
+        fd.append("testimonial", fText.trim());
+        if (fFile) fd.append("profile_image", fFile);
+        try {
+            const url =
+                modal === "add"
+                    ? `${API_URL}/create-testimonials`
+                    : `${API_URL}/update-testimonials/${selected.id}`;
+            const method = modal === "add" ? "POST" : "PUT";
+            const res = await fetch(url, { method, body: fd });
+            if (!res.ok) throw new Error();
+            showToast(
+                modal === "add"
+                    ? "Testimony berhasil ditambahkan!"
+                    : "Testimony berhasil diperbarui!",
+            );
+            setModal(null);
+            fetchData();
+        } catch {
+            showToast("Gagal menyimpan data.", "error");
+        } finally {
+            setSaving(false);
+        }
+    };
+    const handleDelete = async (id) => {
+        if (!window.confirm("Yakin hapus testimony ini?")) return;
+        try {
+            const res = await fetch(`${API_URL}/delete-testimonials/${id}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error();
+            showToast("Testimony berhasil dihapus.");
+            fetchData();
+        } catch {
+            showToast("Gagal menghapus data.", "error");
+        }
+    };
 
-  // ── Logo handlers ──
-  const handleLogoFile = (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    setLogoFile(f);
-    setLogoPreview(URL.createObjectURL(f));
-  };
-  const openLogoModal = () => {
-    setLogoFile(null);
-    setLogoPreview(null);
-    setLogoModal(true);
-  };
-  const handleLogoSave = async () => {
-    if (!logoFile) {
-      showToast("File logo harus dipilih.", "error");
-      return;
-    }
-    setLogoSaving(true);
-    const fd = new FormData();
-    fd.append("logo", logoFile);
-    try {
-      const res = await fetch(`${API_URL}/create-logo`, {
-        method: "POST",
-        body: fd,
-      });
-      if (!res.ok) throw new Error();
-      showToast("Logo berhasil ditambahkan!");
-      setLogoModal(false);
-      fetchLogos();
-      if (onDataChange) onDataChange();
-    } catch {
-      showToast("Gagal menyimpan logo.", "error");
-    } finally {
-      setLogoSaving(false);
-    }
-  };
-  const handleLogoDelete = async (id) => {
-    if (!window.confirm("Yakin hapus logo ini?")) return;
-    try {
-      const res = await fetch(`${API_URL}/delete-logo/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error();
-      showToast("Logo berhasil dihapus.");
-      fetchLogos();
-      if (onDataChange) onDataChange();
-    } catch {
-      showToast("Gagal menghapus logo.", "error");
-    }
-  };
+    // ── Logo handlers ──
+    const handleLogoFile = (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        setLogoFile(f);
+        setLogoPreview(URL.createObjectURL(f));
+    };
+    const openLogoModal = () => {
+        setLogoFile(null);
+        setLogoPreview(null);
+        setLogoModal(true);
+    };
+    const handleLogoSave = async () => {
+        if (!logoFile) {
+            showToast("File logo harus dipilih.", "error");
+            return;
+        }
+        setLogoSaving(true);
+        const fd = new FormData();
+        fd.append("logo", logoFile);
+        try {
+            const res = await fetch(`${API_URL}/create-logo`, {
+                method: "POST",
+                body: fd,
+            });
+            if (!res.ok) throw new Error();
+            showToast("Logo berhasil ditambahkan!");
+            setLogoModal(false);
+            fetchLogos();
+            if (onDataChange) onDataChange();
+        } catch {
+            showToast("Gagal menyimpan logo.", "error");
+        } finally {
+            setLogoSaving(false);
+        }
+    };
+    const handleLogoDelete = async (id) => {
+        if (!window.confirm("Yakin hapus logo ini?")) return;
+        try {
+            const res = await fetch(`${API_URL}/delete-logo/${id}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error();
+            showToast("Logo berhasil dihapus.");
+            fetchLogos();
+            if (onDataChange) onDataChange();
+        } catch {
+            showToast("Gagal menghapus logo.", "error");
+        }
+    };
 
-  const filtered = data.filter(
-    (d) =>
-      d.name?.toLowerCase().includes(search.toLowerCase()) ||
-      d.testimonial?.toLowerCase().includes(search.toLowerCase()),
-  );
-  const total = data.length;
+    const filtered = data.filter(
+        (d) =>
+            d.name?.toLowerCase().includes(search.toLowerCase()) ||
+            d.testimonial?.toLowerCase().includes(search.toLowerCase()),
+    );
+    const total = data.length;
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         .panel-wrap { font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; gap: 1.5rem; }
         .panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
@@ -429,448 +429,572 @@ export const TestimonyPanel = ({ onDataChange }) => {
         @media (max-width: 600px) { .panel-search { width: 100%; } th, td { padding: 0.65rem 0.85rem; } }
       `}</style>
 
-      {toast && <div className={`toast toast-${toast.type}`}>{toast.msg}</div>}
+            {toast && (
+                <div className={`toast toast-${toast.type}`}>{toast.msg}</div>
+            )}
 
-      <div className="panel-wrap">
-        {/* Header — judul & tombol berubah tergantung tab aktif */}
-        <div className="panel-header">
-          <div className="panel-header-left">
-            <h1 className="panel-page-title">
-              {activeTab === "testimony" ? "❝ Testimony" : "🏷️ Logo Klien"}
-            </h1>
-            <p className="panel-page-sub">
-              {activeTab === "testimony"
-                ? "Kelola testimoni klien"
-                : "Kelola logo klien yang tampil di website"}
-            </p>
-          </div>
-          {activeTab === "testimony" ? (
-            <button className="panel-add-btn" onClick={openAdd}>
-              + Tambah Testimony
-            </button>
-          ) : (
-            <button className="panel-add-btn" onClick={openLogoModal}>
-              + Tambah Logo
-            </button>
-          )}
-        </div>
-
-        {/* Stats */}
-        <div className="panel-stats">
-          <div className="stat-card">
-            <span className="stat-label">
-              {activeTab === "testimony" ? "Total Testimony" : "Total Logo"}
-            </span>
-            <span className="stat-value">
-              {activeTab === "testimony"
-                ? loading
-                  ? "—"
-                  : total
-                : logoLoading
-                  ? "—"
-                  : logos.length}
-            </span>
-            <span className="stat-hint">item terdaftar</span>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="panel-card" style={{ overflow: "visible" }}>
-          <div className="tab-nav">
-            <button
-              className={`tab-btn ${activeTab === "testimony" ? "active" : ""}`}
-              onClick={() => setActiveTab("testimony")}
-            >
-              ❝ Testimony
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "logo" ? "active" : ""}`}
-              onClick={() => setActiveTab("logo")}
-            >
-              🏷️ Logo Klien
-            </button>
-          </div>
-
-          {/* ── Tab: Testimony ── */}
-          {activeTab === "testimony" && (
-            <>
-              <div
-                className="panel-card-header"
-                style={{ borderTop: "1px solid #f1f5f9" }}
-              >
-                <span className="panel-card-title">Daftar Testimony</span>
-                <input
-                  className="panel-search"
-                  placeholder="Cari nama / teks…"
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <div className="panel-table-wrap">
-                {loading ? (
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>No</th>
-                        <th>Foto</th>
-                        <th>Nama</th>
-                        <th>Testimoni</th>
-                        <th>Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[1, 2, 3].map((i) => (
-                        <tr key={i} className="skeleton-row">
-                          <td>
-                            <span className="skel" style={{ width: 20 }} />
-                          </td>
-                          <td>
-                            <span
-                              className="skel"
-                              style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "50%",
-                                display: "inline-block",
-                              }}
-                            />
-                          </td>
-                          <td>
-                            <span className="skel" style={{ width: 120 }} />
-                          </td>
-                          <td>
-                            <span className="skel" style={{ width: 220 }} />
-                          </td>
-                          <td>
-                            <span className="skel" style={{ width: 80 }} />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : filtered.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-icon">❝</div>
-                    <p>
-                      {search
-                        ? "Tidak ada hasil pencarian."
-                        : "Belum ada data Testimony."}
-                    </p>
-                    {!search && (
-                      <p>
-                        Klik <strong>+ Tambah Testimony</strong> untuk mulai.
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>No</th>
-                        <th>Foto</th>
-                        <th>Nama</th>
-                        <th>Testimoni</th>
-                        <th>Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((row, i) => {
-                        const photo = fmtPhoto(row.profile_image);
-                        const initial = (row.name || "?")
-                          .charAt(0)
-                          .toUpperCase();
-                        return (
-                          <tr key={row.id}>
-                            <td
-                              style={{ color: "#9ca3af", fontSize: "0.8rem" }}
-                            >
-                              {i + 1}
-                            </td>
-                            <td>
-                              {photo ? (
-                                <img
-                                  src={photo}
-                                  alt={row.name}
-                                  className="td-avatar"
-                                />
-                              ) : (
-                                <div className="td-avatar-placeholder">
-                                  {initial}
-                                </div>
-                              )}
-                            </td>
-                            <td
-                              style={{
-                                fontWeight: 600,
-                                color: "#1a2744",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {row.name}
-                            </td>
-                            <td>
-                              <div className="td-quote">
-                                "{row.testimonial}"
-                              </div>
-                            </td>
-                            <td>
-                              <div style={{ display: "flex", gap: "0.4rem" }}>
-                                <button
-                                  className="action-btn"
-                                  onClick={() => openEdit(row)}
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  className="action-btn del"
-                                  onClick={() => handleDelete(row.id)}
-                                >
-                                  Hapus
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* ── Tab: Logo ── */}
-          {activeTab === "logo" && (
-            <>
-              <div
-                className="panel-card-header"
-                style={{ borderTop: "1px solid #f1f5f9" }}
-              >
-                <span className="panel-card-title">Daftar Logo Klien</span>
-                <span style={{ fontSize: "0.78rem", color: "#9ca3af" }}>
-                  Logo ditampilkan sebagai ticker bergerak di website
-                </span>
-              </div>
-              {logoLoading ? (
-                <div className="logo-skel-grid">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="logo-skel-card" />
-                  ))}
-                </div>
-              ) : logos.length === 0 ? (
-                <div className="logo-empty">
-                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
-                    🏷️
-                  </div>
-                  <p>Belum ada logo yang ditambahkan.</p>
-                  <p>
-                    Klik <strong>+ Tambah Logo</strong> untuk mulai.
-                  </p>
-                </div>
-              ) : (
-                <div className="logo-grid">
-                  {logos.map((logo, i) => {
-                    const src = fmtPhoto(logo.image_url);
-                    return (
-                      <div key={logo.id} className="logo-card">
-                        {src ? (
-                          <img src={src} alt={`Logo ${i + 1}`} />
-                        ) : (
-                          <div
-                            style={{
-                              height: 40,
-                              display: "flex",
-                              alignItems: "center",
-                              color: "#b0bbd4",
-                              fontSize: "0.8rem",
-                            }}
-                          >
-                            No image
-                          </div>
-                        )}
-                        <span className="logo-card-id">ID #{logo.id}</span>
-                        <button
-                          className="action-btn del"
-                          onClick={() => handleLogoDelete(logo.id)}
-                        >
-                          Hapus
+            <div className="panel-wrap">
+                {/* Header — judul & tombol berubah tergantung tab aktif */}
+                <div className="panel-header">
+                    <div className="panel-header-left">
+                        <h1 className="panel-page-title">
+                            {activeTab === "testimony"
+                                ? "❝ Testimony"
+                                : "🏷️ Logo Klien"}
+                        </h1>
+                        <p className="panel-page-sub">
+                            {activeTab === "testimony"
+                                ? "Kelola testimoni klien"
+                                : "Kelola logo klien yang tampil di website"}
+                        </p>
+                    </div>
+                    {activeTab === "testimony" ? (
+                        <button className="panel-add-btn" onClick={openAdd}>
+                            + Tambah Testimony
                         </button>
-                      </div>
-                    );
-                  })}
+                    ) : (
+                        <button
+                            className="panel-add-btn"
+                            onClick={openLogoModal}
+                        >
+                            + Tambah Logo
+                        </button>
+                    )}
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
 
-      {/* ── Modal Testimony Add/Edit ── */}
-      {modal && (
-        <Modal
-          title={modal === "add" ? "Tambah Testimony" : "Edit Testimony"}
-          onClose={() => setModal(null)}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              marginBottom: "1.2rem",
-            }}
-          >
-            {fPreview ? (
-              <img src={fPreview} alt="preview" className="photo-preview" />
-            ) : (
-              <div className="photo-placeholder">
-                {fName ? fName.charAt(0).toUpperCase() : "?"}
-              </div>
-            )}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.3rem",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.78rem",
-                  fontWeight: 700,
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                Foto Profil
-              </span>
-              <button
-                style={{
-                  padding: "0.35rem 0.8rem",
-                  border: "1.5px solid #e5e7eb",
-                  borderRadius: "7px",
-                  background: "none",
-                  cursor: "pointer",
-                  fontFamily: "'Plus Jakarta Sans',sans-serif",
-                  fontSize: "0.78rem",
-                  fontWeight: 600,
-                  color: "#374151",
-                  transition: "all 0.18s",
-                }}
-                onClick={() => fileRef.current.click()}
-              >
-                {fPreview ? "Ganti Foto" : "Pilih Foto"}
-              </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleFile}
-              />
-              <span style={{ fontSize: "0.72rem", color: "#9ca3af" }}>
-                JPG / PNG / WebP
-              </span>
+                {/* Stats */}
+                <div className="panel-stats">
+                    <div className="stat-card">
+                        <span className="stat-label">
+                            {activeTab === "testimony"
+                                ? "Total Testimony"
+                                : "Total Logo"}
+                        </span>
+                        <span className="stat-value">
+                            {activeTab === "testimony"
+                                ? loading
+                                    ? "—"
+                                    : total
+                                : logoLoading
+                                  ? "—"
+                                  : logos.length}
+                        </span>
+                        <span className="stat-hint">item terdaftar</span>
+                    </div>
+                </div>
+
+                {/* Tab Navigation */}
+                <div className="panel-card" style={{ overflow: "visible" }}>
+                    <div className="tab-nav">
+                        <button
+                            className={`tab-btn ${activeTab === "testimony" ? "active" : ""}`}
+                            onClick={() => setActiveTab("testimony")}
+                        >
+                            ❝ Testimony
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === "logo" ? "active" : ""}`}
+                            onClick={() => setActiveTab("logo")}
+                        >
+                            🏷️ Logo Klien
+                        </button>
+                    </div>
+
+                    {/* ── Tab: Testimony ── */}
+                    {activeTab === "testimony" && (
+                        <>
+                            <div
+                                className="panel-card-header"
+                                style={{ borderTop: "1px solid #f1f5f9" }}
+                            >
+                                <span className="panel-card-title">
+                                    Daftar Testimony
+                                </span>
+                                <input
+                                    className="panel-search"
+                                    placeholder="Cari nama / teks…"
+                                    type="search"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                            <div className="panel-table-wrap">
+                                {loading ? (
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Foto</th>
+                                                <th>Nama</th>
+                                                <th>Testimoni</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {[1, 2, 3].map((i) => (
+                                                <tr
+                                                    key={i}
+                                                    className="skeleton-row"
+                                                >
+                                                    <td>
+                                                        <span
+                                                            className="skel"
+                                                            style={{
+                                                                width: 20,
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className="skel"
+                                                            style={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                borderRadius:
+                                                                    "50%",
+                                                                display:
+                                                                    "inline-block",
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className="skel"
+                                                            style={{
+                                                                width: 120,
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className="skel"
+                                                            style={{
+                                                                width: 220,
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className="skel"
+                                                            style={{
+                                                                width: 80,
+                                                            }}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                ) : filtered.length === 0 ? (
+                                    <div className="empty-state">
+                                        <div className="empty-icon">❝</div>
+                                        <p>
+                                            {search
+                                                ? "Tidak ada hasil pencarian."
+                                                : "Belum ada data Testimony."}
+                                        </p>
+                                        {!search && (
+                                            <p>
+                                                Klik{" "}
+                                                <strong>
+                                                    + Tambah Testimony
+                                                </strong>{" "}
+                                                untuk mulai.
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Foto</th>
+                                                <th>Nama</th>
+                                                <th>Testimoni</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filtered.map((row, i) => {
+                                                const photo = fmtPhoto(
+                                                    row.profile_image,
+                                                );
+                                                const initial = (
+                                                    row.name || "?"
+                                                )
+                                                    .charAt(0)
+                                                    .toUpperCase();
+                                                return (
+                                                    <tr key={row.id}>
+                                                        <td
+                                                            style={{
+                                                                color: "#9ca3af",
+                                                                fontSize:
+                                                                    "0.8rem",
+                                                            }}
+                                                        >
+                                                            {i + 1}
+                                                        </td>
+                                                        <td>
+                                                            {photo ? (
+                                                                <img
+                                                                    src={photo}
+                                                                    alt={
+                                                                        row.name
+                                                                    }
+                                                                    className="td-avatar"
+                                                                />
+                                                            ) : (
+                                                                <div className="td-avatar-placeholder">
+                                                                    {initial}
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                        <td
+                                                            style={{
+                                                                fontWeight: 600,
+                                                                color: "#1a2744",
+                                                                whiteSpace:
+                                                                    "nowrap",
+                                                            }}
+                                                        >
+                                                            {row.name}
+                                                        </td>
+                                                        <td>
+                                                            <div className="td-quote">
+                                                                "
+                                                                {
+                                                                    row.testimonial
+                                                                }
+                                                                "
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div
+                                                                style={{
+                                                                    display:
+                                                                        "flex",
+                                                                    gap: "0.4rem",
+                                                                }}
+                                                            >
+                                                                <button
+                                                                    className="action-btn"
+                                                                    onClick={() =>
+                                                                        openEdit(
+                                                                            row,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                                <button
+                                                                    className="action-btn del"
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            row.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Hapus
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    {/* ── Tab: Logo ── */}
+                    {activeTab === "logo" && (
+                        <>
+                            <div
+                                className="panel-card-header"
+                                style={{ borderTop: "1px solid #f1f5f9" }}
+                            >
+                                <span className="panel-card-title">
+                                    Daftar Logo Klien
+                                </span>
+                                <span
+                                    style={{
+                                        fontSize: "0.78rem",
+                                        color: "#9ca3af",
+                                    }}
+                                >
+                                    Logo ditampilkan sebagai ticker bergerak di
+                                    website
+                                </span>
+                            </div>
+                            {logoLoading ? (
+                                <div className="logo-skel-grid">
+                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                        <div
+                                            key={i}
+                                            className="logo-skel-card"
+                                        />
+                                    ))}
+                                </div>
+                            ) : logos.length === 0 ? (
+                                <div className="logo-empty">
+                                    <div
+                                        style={{
+                                            fontSize: "2rem",
+                                            marginBottom: "0.5rem",
+                                        }}
+                                    >
+                                        🏷️
+                                    </div>
+                                    <p>Belum ada logo yang ditambahkan.</p>
+                                    <p>
+                                        Klik <strong>+ Tambah Logo</strong>{" "}
+                                        untuk mulai.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="logo-grid">
+                                    {logos.map((logo, i) => {
+                                        const src = fmtPhoto(logo.image_url);
+                                        return (
+                                            <div
+                                                key={logo.id}
+                                                className="logo-card"
+                                            >
+                                                {src ? (
+                                                    <img
+                                                        src={src}
+                                                        alt={`Logo ${i + 1}`}
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            height: 40,
+                                                            display: "flex",
+                                                            alignItems:
+                                                                "center",
+                                                            color: "#b0bbd4",
+                                                            fontSize: "0.8rem",
+                                                        }}
+                                                    >
+                                                        No image
+                                                    </div>
+                                                )}
+                                                <span className="logo-card-id">
+                                                    ID #{logo.id}
+                                                </span>
+                                                <button
+                                                    className="action-btn del"
+                                                    onClick={() =>
+                                                        handleLogoDelete(
+                                                            logo.id,
+                                                        )
+                                                    }
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
-          </div>
 
-          <div className="field">
-            <label>Nama</label>
-            <input
-              type="text"
-              placeholder="Nama klien"
-              value={fName}
-              onChange={(e) => setFName(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label>Testimoni</label>
-            <textarea
-              placeholder="Tulis testimoni di sini…"
-              value={fText}
-              onChange={(e) => setFText(e.target.value)}
-            />
-          </div>
-
-          <div className="modal-actions">
-            <button className="btn-cancel" onClick={() => setModal(null)}>
-              Batal
-            </button>
-            <button className="btn-save" onClick={handleSave} disabled={saving}>
-              {saving ? "Menyimpan…" : "Simpan"}
-            </button>
-          </div>
-        </Modal>
-      )}
-
-      {/* ── Modal Logo Add ── */}
-      {logoModal && (
-        <Modal title="Tambah Logo Klien" onClose={() => setLogoModal(false)}>
-          <div
-            className="logo-upload-area"
-            onClick={() => logoFileRef.current.click()}
-          >
-            {logoPreview ? (
-              <img src={logoPreview} alt="preview logo" />
-            ) : (
-              <>
-                <span style={{ fontSize: "2rem" }}>🖼️</span>
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    fontWeight: 600,
-                    color: "#374151",
-                  }}
+            {/* ── Modal Testimony Add/Edit ── */}
+            {modal && (
+                <Modal
+                    title={
+                        modal === "add" ? "Tambah Testimony" : "Edit Testimony"
+                    }
+                    onClose={() => setModal(null)}
                 >
-                  Klik untuk pilih file logo
-                </span>
-              </>
-            )}
-            <span className="logo-upload-hint">
-              PNG / SVG / WebP — rekomendasi rasio landscape, background
-              transparan
-            </span>
-          </div>
-          <input
-            ref={logoFileRef}
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleLogoFile}
-          />
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "1rem",
+                            marginBottom: "1.2rem",
+                        }}
+                    >
+                        {fPreview ? (
+                            <img
+                                src={fPreview}
+                                alt="preview"
+                                className="photo-preview"
+                            />
+                        ) : (
+                            <div className="photo-placeholder">
+                                {fName ? fName.charAt(0).toUpperCase() : "?"}
+                            </div>
+                        )}
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.3rem",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontSize: "0.78rem",
+                                    fontWeight: 700,
+                                    color: "#6b7280",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.04em",
+                                }}
+                            >
+                                Foto Profil
+                            </span>
+                            <button
+                                style={{
+                                    padding: "0.35rem 0.8rem",
+                                    border: "1.5px solid #e5e7eb",
+                                    borderRadius: "7px",
+                                    background: "none",
+                                    cursor: "pointer",
+                                    fontFamily:
+                                        "'Plus Jakarta Sans',sans-serif",
+                                    fontSize: "0.78rem",
+                                    fontWeight: 600,
+                                    color: "#374151",
+                                    transition: "all 0.18s",
+                                }}
+                                onClick={() => fileRef.current.click()}
+                            >
+                                {fPreview ? "Ganti Foto" : "Pilih Foto"}
+                            </button>
+                            <input
+                                ref={fileRef}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: "none" }}
+                                onChange={handleFile}
+                            />
+                            <span
+                                style={{
+                                    fontSize: "0.72rem",
+                                    color: "#9ca3af",
+                                }}
+                            >
+                                JPG / PNG / WebP
+                            </span>
+                        </div>
+                    </div>
 
-          <div className="modal-actions">
-            <button className="btn-cancel" onClick={() => setLogoModal(false)}>
-              Batal
-            </button>
-            <button
-              className="btn-save"
-              onClick={handleLogoSave}
-              disabled={logoSaving}
-            >
-              {logoSaving ? "Menyimpan…" : "Simpan"}
-            </button>
-          </div>
-        </Modal>
-      )}
-    </>
-  );
+                    <div className="field">
+                        <label>Nama</label>
+                        <input
+                            type="text"
+                            placeholder="Nama klien"
+                            value={fName}
+                            onChange={(e) => setFName(e.target.value)}
+                        />
+                    </div>
+                    <div className="field">
+                        <label>Testimoni</label>
+                        <textarea
+                            placeholder="Tulis testimoni di sini…"
+                            value={fText}
+                            onChange={(e) => setFText(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="modal-actions">
+                        <button
+                            className="btn-cancel"
+                            onClick={() => setModal(null)}
+                        >
+                            Batal
+                        </button>
+                        <button
+                            className="btn-save"
+                            onClick={handleSave}
+                            disabled={saving}
+                        >
+                            {saving ? "Menyimpan…" : "Simpan"}
+                        </button>
+                    </div>
+                </Modal>
+            )}
+
+            {/* ── Modal Logo Add ── */}
+            {logoModal && (
+                <Modal
+                    title="Tambah Logo Klien"
+                    onClose={() => setLogoModal(false)}
+                >
+                    <div
+                        className="logo-upload-area"
+                        onClick={() => logoFileRef.current.click()}
+                    >
+                        {logoPreview ? (
+                            <img src={logoPreview} alt="preview logo" />
+                        ) : (
+                            <>
+                                <span style={{ fontSize: "2rem" }}>🖼️</span>
+                                <span
+                                    style={{
+                                        fontSize: "0.85rem",
+                                        fontWeight: 600,
+                                        color: "#374151",
+                                    }}
+                                >
+                                    Klik untuk pilih file logo
+                                </span>
+                            </>
+                        )}
+                        <span className="logo-upload-hint">
+                            PNG / SVG / WebP — rekomendasi rasio landscape,
+                            background transparan
+                        </span>
+                    </div>
+                    <input
+                        ref={logoFileRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleLogoFile}
+                    />
+
+                    <div className="modal-actions">
+                        <button
+                            className="btn-cancel"
+                            onClick={() => setLogoModal(false)}
+                        >
+                            Batal
+                        </button>
+                        <button
+                            className="btn-save"
+                            onClick={handleLogoSave}
+                            disabled={logoSaving}
+                        >
+                            {logoSaving ? "Menyimpan…" : "Simpan"}
+                        </button>
+                    </div>
+                </Modal>
+            )}
+        </>
+    );
 };
 
 // ─── Logo Marquee ──────────────────────────────────────────────────────────
 function LogoMarquee({ logos }) {
-  // Duplikasi item agar marquee seamless
-  const items = logos.length > 0 ? [...logos, ...logos] : [];
+    // Duplikasi item agar marquee seamless
+    const items = logos.length > 0 ? [...logos, ...logos] : [];
 
-  if (logos.length === 0) return null;
+    if (logos.length === 0) return null;
 
-  // Kecepatan: semakin banyak logo, durasi makin lama agar tetap nyaman
-  const duration = Math.max(12, logos.length * 3);
+    // Kecepatan: semakin banyak logo, durasi makin lama agar tetap nyaman
+    const duration = Math.max(12, logos.length * 3);
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         .marquee-outer {
           overflow: hidden;
           width: 100%;
@@ -935,289 +1059,300 @@ function LogoMarquee({ logos }) {
           .marquee-item { padding: 0 24px; }
         }
       `}</style>
-      <div className="marquee-outer">
-        <div
-          className="marquee-track"
-          style={{ "--marquee-dur": `${duration}s` }}
-        >
-          {items.map((logo, idx) => {
-            const src = fmtPhoto(logo.image_url);
-            if (!src) return null;
-            return (
-              <div key={`${logo.id}-${idx}`} className="marquee-item">
-                <img
-                  src={src}
-                  alt={`Client logo ${logo.id}`}
-                  className="marquee-logo"
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </>
-  );
+            <div className="marquee-outer">
+                <div
+                    className="marquee-track"
+                    style={{ "--marquee-dur": `${duration}s` }}
+                >
+                    {items.map((logo, idx) => {
+                        const src = fmtPhoto(logo.image_url);
+                        if (!src) return null;
+                        return (
+                            <div
+                                key={`${logo.id}-${idx}`}
+                                className="marquee-item"
+                            >
+                                <img
+                                    src={src}
+                                    alt={`Client logo ${logo.id}`}
+                                    className="marquee-logo"
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </>
+    );
 }
 
 // ─── Testimony Carousel ────────────────────────────────────────────────────
 function TestimonyCarousel({ testimonials }) {
-  const trackRef = useRef(null);
-  const [cardsPerView, setCardsPerView] = useState(4);
-  const [current, setCurrent] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartX = useRef(0);
-  const dragDeltaX = useRef(0);
-  const autoTimer = useRef(null);
+    const trackRef = useRef(null);
+    const [cardsPerView, setCardsPerView] = useState(4);
+    const [current, setCurrent] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartX = useRef(0);
+    const dragDeltaX = useRef(0);
+    const autoTimer = useRef(null);
 
-  const total = testimonials.length;
-  const maxIndex = Math.max(0, total - cardsPerView);
+    const total = testimonials.length;
+    const maxIndex = Math.max(0, total - cardsPerView);
 
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w >= 1024) setCardsPerView(4);
-      else if (w >= 768) setCardsPerView(3);
-      else if (w >= 480) setCardsPerView(2);
-      else setCardsPerView(1);
+    useEffect(() => {
+        const update = () => {
+            const w = window.innerWidth;
+            if (w >= 1024) setCardsPerView(4);
+            else if (w >= 768) setCardsPerView(3);
+            else if (w >= 480) setCardsPerView(2);
+            else setCardsPerView(1);
+        };
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, []);
+
+    useEffect(() => {
+        setCurrent((c) => Math.min(c, Math.max(0, total - cardsPerView)));
+    }, [cardsPerView, total]);
+
+    useEffect(() => {
+        if (total <= cardsPerView) return;
+        autoTimer.current = setInterval(() => {
+            setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
+        }, 3500);
+        return () => clearInterval(autoTimer.current);
+    }, [total, cardsPerView, maxIndex]);
+
+    const resetTimer = () => {
+        clearInterval(autoTimer.current);
+        if (total > cardsPerView) {
+            autoTimer.current = setInterval(() => {
+                setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
+            }, 3500);
+        }
     };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
 
-  useEffect(() => {
-    setCurrent((c) => Math.min(c, Math.max(0, total - cardsPerView)));
-  }, [cardsPerView, total]);
+    const goTo = (idx) => {
+        const clamped = Math.max(0, Math.min(idx, maxIndex));
+        setCurrent(clamped);
+        resetTimer();
+    };
 
-  useEffect(() => {
-    if (total <= cardsPerView) return;
-    autoTimer.current = setInterval(() => {
-      setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
-    }, 3500);
-    return () => clearInterval(autoTimer.current);
-  }, [total, cardsPerView, maxIndex]);
+    const onDragStart = (clientX) => {
+        setIsDragging(true);
+        dragStartX.current = clientX;
+        dragDeltaX.current = 0;
+        clearInterval(autoTimer.current);
+    };
+    const onDragMove = (clientX) => {
+        if (!isDragging) return;
+        dragDeltaX.current = clientX - dragStartX.current;
+    };
+    const onDragEnd = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+        const threshold = 60;
+        if (dragDeltaX.current < -threshold) goTo(current + 1);
+        else if (dragDeltaX.current > threshold) goTo(current - 1);
+        else resetTimer();
+    };
 
-  const resetTimer = () => {
-    clearInterval(autoTimer.current);
-    if (total > cardsPerView) {
-      autoTimer.current = setInterval(() => {
-        setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
-      }, 3500);
-    }
-  };
+    const cardWidthPct = 100 / cardsPerView;
+    const translateX = -(current * cardWidthPct);
 
-  const goTo = (idx) => {
-    const clamped = Math.max(0, Math.min(idx, maxIndex));
-    setCurrent(clamped);
-    resetTimer();
-  };
-
-  const onDragStart = (clientX) => {
-    setIsDragging(true);
-    dragStartX.current = clientX;
-    dragDeltaX.current = 0;
-    clearInterval(autoTimer.current);
-  };
-  const onDragMove = (clientX) => {
-    if (!isDragging) return;
-    dragDeltaX.current = clientX - dragStartX.current;
-  };
-  const onDragEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const threshold = 60;
-    if (dragDeltaX.current < -threshold) goTo(current + 1);
-    else if (dragDeltaX.current > threshold) goTo(current - 1);
-    else resetTimer();
-  };
-
-  const cardWidthPct = 100 / cardsPerView;
-  const translateX = -(current * cardWidthPct);
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        width: "100%",
-        userSelect: "none",
-      }}
-    >
-      <div
-        ref={trackRef}
-        style={{
-          display: "flex",
-          transition: isDragging
-            ? "none"
-            : "transform 0.45s cubic-bezier(0.4,0,0.2,1)",
-          transform: `translateX(${translateX}%)`,
-          cursor: isDragging ? "grabbing" : "grab",
-          willChange: "transform",
-        }}
-        onMouseDown={(e) => onDragStart(e.clientX)}
-        onMouseMove={(e) => onDragMove(e.clientX)}
-        onMouseUp={onDragEnd}
-        onMouseLeave={onDragEnd}
-        onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
-        onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
-        onTouchEnd={onDragEnd}
-      >
-        {testimonials.map((t) => {
-          const photoUrl = fmtPhoto(t.profile_image);
-          return (
-            <div
-              key={t.id}
-              style={{
-                minWidth: `${cardWidthPct}%`,
-                boxSizing: "border-box",
-                padding: "0 10px",
-              }}
-            >
-              <div className="testimony-card">
-                {photoUrl ? (
-                  <img src={photoUrl} alt={t.name} className="card-avatar" />
-                ) : (
-                  <div className="card-avatar-placeholder">
-                    {(t.name || "?").charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <p className="card-quote">"{t.testimonial}"</p>
-                <p className="card-name">— {t.name}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {total > cardsPerView && (
+    return (
         <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 8,
-            marginTop: 24,
-          }}
+            style={{
+                position: "relative",
+                overflow: "hidden",
+                width: "100%",
+                userSelect: "none",
+            }}
         >
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              aria-label={`Slide ${i + 1}`}
-              style={{
-                width: current === i ? 24 : 8,
-                height: 8,
-                borderRadius: 4,
-                border: "none",
-                background: current === i ? "#1a2744" : "#d1d5db",
-                cursor: "pointer",
-                padding: 0,
-                transition: "all 0.3s ease",
-              }}
-            />
-          ))}
-        </div>
-      )}
+            <div
+                ref={trackRef}
+                style={{
+                    display: "flex",
+                    transition: isDragging
+                        ? "none"
+                        : "transform 0.45s cubic-bezier(0.4,0,0.2,1)",
+                    transform: `translateX(${translateX}%)`,
+                    cursor: isDragging ? "grabbing" : "grab",
+                    willChange: "transform",
+                }}
+                onMouseDown={(e) => onDragStart(e.clientX)}
+                onMouseMove={(e) => onDragMove(e.clientX)}
+                onMouseUp={onDragEnd}
+                onMouseLeave={onDragEnd}
+                onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
+                onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
+                onTouchEnd={onDragEnd}
+            >
+                {testimonials.map((t) => {
+                    const photoUrl = fmtPhoto(t.profile_image);
+                    return (
+                        <div
+                            key={t.id}
+                            style={{
+                                minWidth: `${cardWidthPct}%`,
+                                boxSizing: "border-box",
+                                padding: "0 10px",
+                            }}
+                        >
+                            <div className="testimony-card">
+                                {photoUrl ? (
+                                    <img
+                                        src={photoUrl}
+                                        alt={t.name}
+                                        className="card-avatar"
+                                    />
+                                ) : (
+                                    <div className="card-avatar-placeholder">
+                                        {(t.name || "?")
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </div>
+                                )}
+                                <p className="card-quote">"{t.testimonial}"</p>
+                                <p className="card-name">— {t.name}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
 
-      {total > cardsPerView && (
-        <>
-          <button
-            onClick={() => goTo(current - 1)}
-            disabled={current === 0}
-            aria-label="Previous"
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: 0,
-              transform: "translateY(-60%)",
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              border: "1.5px solid #e5e7eb",
-              background: "#fff",
-              cursor: current === 0 ? "not-allowed" : "pointer",
-              opacity: current === 0 ? 0.35 : 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 16,
-              color: "#1a2744",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              transition: "opacity 0.2s",
-              zIndex: 2,
-            }}
-          >
-            ‹
-          </button>
-          <button
-            onClick={() => goTo(current + 1)}
-            disabled={current >= maxIndex}
-            aria-label="Next"
-            style={{
-              position: "absolute",
-              top: "50%",
-              right: 0,
-              transform: "translateY(-60%)",
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              border: "1.5px solid #e5e7eb",
-              background: "#fff",
-              cursor: current >= maxIndex ? "not-allowed" : "pointer",
-              opacity: current >= maxIndex ? 0.35 : 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 16,
-              color: "#1a2744",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              transition: "opacity 0.2s",
-              zIndex: 2,
-            }}
-          >
-            ›
-          </button>
-        </>
-      )}
-    </div>
-  );
+            {total > cardsPerView && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: 8,
+                        marginTop: 24,
+                    }}
+                >
+                    {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => goTo(i)}
+                            aria-label={`Slide ${i + 1}`}
+                            style={{
+                                width: current === i ? 24 : 8,
+                                height: 8,
+                                borderRadius: 4,
+                                border: "none",
+                                background:
+                                    current === i ? "#1a2744" : "#d1d5db",
+                                cursor: "pointer",
+                                padding: 0,
+                                transition: "all 0.3s ease",
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {total > cardsPerView && (
+                <>
+                    <button
+                        onClick={() => goTo(current - 1)}
+                        disabled={current === 0}
+                        aria-label="Previous"
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: 0,
+                            transform: "translateY(-60%)",
+                            width: 36,
+                            height: 36,
+                            borderRadius: "50%",
+                            border: "1.5px solid #e5e7eb",
+                            background: "#fff",
+                            cursor: current === 0 ? "not-allowed" : "pointer",
+                            opacity: current === 0 ? 0.35 : 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 16,
+                            color: "#1a2744",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                            transition: "opacity 0.2s",
+                            zIndex: 2,
+                        }}
+                    >
+                        ‹
+                    </button>
+                    <button
+                        onClick={() => goTo(current + 1)}
+                        disabled={current >= maxIndex}
+                        aria-label="Next"
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            right: 0,
+                            transform: "translateY(-60%)",
+                            width: 36,
+                            height: 36,
+                            borderRadius: "50%",
+                            border: "1.5px solid #e5e7eb",
+                            background: "#fff",
+                            cursor:
+                                current >= maxIndex ? "not-allowed" : "pointer",
+                            opacity: current >= maxIndex ? 0.35 : 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 16,
+                            color: "#1a2744",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                            transition: "opacity 0.2s",
+                            zIndex: 2,
+                        }}
+                    >
+                        ›
+                    </button>
+                </>
+            )}
+        </div>
+    );
 }
 
 // ─── Main Public Component (TestimonySection) ──────────────────────────────
 export default function TestimonySection() {
-  const [testimonials, setTestimonials] = useState([]);
-  const [logos, setLogos] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [testimonials, setTestimonials] = useState([]);
+    const [logos, setLogos] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  const loadPublicTestimonials = async () => {
-    try {
-      const res = await fetch(`${API_URL}/testimonials`);
-      const json = await res.json();
-      setTestimonials(Array.isArray(json) ? json : []);
-    } catch (err) {
-      console.error("Gagal memuat testimoni publik:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadPublicTestimonials = async () => {
+        try {
+            const res = await fetch(`${API_URL}/testimonials`);
+            const json = await res.json();
+            setTestimonials(Array.isArray(json) ? json : []);
+        } catch (err) {
+            console.error("Gagal memuat testimoni publik:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const loadPublicLogos = async () => {
-    try {
-      const res = await fetch(`${API_URL}/load-logo`, { method: "POST" });
-      const json = await res.json();
-      setLogos(Array.isArray(json) ? json : []);
-    } catch (err) {
-      console.error("Gagal memuat logo publik:", err);
-    }
-  };
+    const loadPublicLogos = async () => {
+        try {
+            const res = await fetch(`${API_URL}/load-logo`, { method: "POST" });
+            const json = await res.json();
+            setLogos(Array.isArray(json) ? json : []);
+        } catch (err) {
+            console.error("Gagal memuat logo publik:", err);
+        }
+    };
 
-  useEffect(() => {
-    loadPublicTestimonials();
-    loadPublicLogos();
-  }, []);
+    useEffect(() => {
+        loadPublicTestimonials();
+        loadPublicLogos();
+    }, []);
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
         .testimony-section {
           font-family: 'Plus Jakarta Sans', sans-serif;
@@ -1267,61 +1402,73 @@ export default function TestimonySection() {
         }
       `}</style>
 
-      <section
-        id="testimony"
-        className="testimony-section"
-        style={{ scrollMarginTop: "80px" }}
-      >
-        <div className="testimony-header">
-          <h2 className="testimony-title">Testimony Our Talent</h2>
-          <p className="testimony-subtitle">
-            Hainick is an excellent talent agency that provides the best
-            service.
-          </p>
-        </div>
-
-        {loading ? (
-          <div style={{ display: "flex", gap: 20 }}>
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} style={{ flex: "1 0 0", minWidth: 0 }}>
-                <div className="testimony-card">
-                  <div
-                    className="section-skeleton"
-                    style={{ width: 56, height: 56, borderRadius: "50%" }}
-                  />
-                  <div
-                    className="section-skeleton"
-                    style={{ height: 14, width: "90%" }}
-                  />
-                  <div
-                    className="section-skeleton"
-                    style={{ height: 14, width: "75%" }}
-                  />
-                  <div
-                    className="section-skeleton"
-                    style={{ height: 12, width: "40%", marginTop: "auto" }}
-                  />
+            <section
+                id="testimony"
+                className="testimony-section"
+                style={{ scrollMarginTop: "80px" }}
+            >
+                <div className="testimony-header">
+                    <h2 className="testimony-title">Testimony Our Talent</h2>
+                    <p className="testimony-subtitle">
+                        Hainick is an excellent talent agency that provides the
+                        best service.
+                    </p>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : testimonials.length === 0 ? (
-          <div
-            style={{ textAlign: "center", color: "#9ca3af", padding: "2rem" }}
-          >
-            Belum ada testimoni yang tersedia.
-          </div>
-        ) : (
-          <TestimonyCarousel testimonials={testimonials} />
-        )}
-      </section>
 
-      {/* ── Clients strip — infinite marquee ── */}
-      {logos.length > 0 && (
-        <div className="clients-strip">
-          <LogoMarquee logos={logos} />
-        </div>
-      )}
-    </>
-  );
+                {loading ? (
+                    <div style={{ display: "flex", gap: 20 }}>
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} style={{ flex: "1 0 0", minWidth: 0 }}>
+                                <div className="testimony-card">
+                                    <div
+                                        className="section-skeleton"
+                                        style={{
+                                            width: 56,
+                                            height: 56,
+                                            borderRadius: "50%",
+                                        }}
+                                    />
+                                    <div
+                                        className="section-skeleton"
+                                        style={{ height: 14, width: "90%" }}
+                                    />
+                                    <div
+                                        className="section-skeleton"
+                                        style={{ height: 14, width: "75%" }}
+                                    />
+                                    <div
+                                        className="section-skeleton"
+                                        style={{
+                                            height: 12,
+                                            width: "40%",
+                                            marginTop: "auto",
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : testimonials.length === 0 ? (
+                    <div
+                        style={{
+                            textAlign: "center",
+                            color: "#9ca3af",
+                            padding: "2rem",
+                        }}
+                    >
+                        Belum ada testimoni yang tersedia.
+                    </div>
+                ) : (
+                    <TestimonyCarousel testimonials={testimonials} />
+                )}
+            </section>
+
+            {/* ── Clients strip — infinite marquee ── */}
+            {logos.length > 0 && (
+                <div className="clients-strip">
+                    <LogoMarquee logos={logos} />
+                </div>
+            )}
+        </>
+    );
 }

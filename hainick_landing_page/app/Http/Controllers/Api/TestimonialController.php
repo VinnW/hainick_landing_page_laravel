@@ -53,7 +53,7 @@ class TestimonialController extends Controller
             $fields['testimonial'] = $request->input('testimonial');
         }
         if ($request->hasFile('profile_image')) {
-            $fields['profile_image'] = $this->convertToWebp($request->file('image'));
+            $fields['profile_image'] = $this->convertToWebp($request->file('profile_image'));
         }
 
         if (empty($fields)) {

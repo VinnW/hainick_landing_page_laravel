@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { API_URL } from "../../../utils/api";
+import { API_URL, BASE_URL } from "../../../utils/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 /**
@@ -99,7 +99,7 @@ const UserPlaceholderIcon = () => (
 // ── Talent Photo Card ─────────────────────────────────────────────────────────
 const TalentPhotoCard = ({ talent, onClick }) => {
     const [imgError, setImgError] = useState(false);
-    const photo = talent?.image_url ? `${API_URL}${talent.image_url}` : null;
+    const photo = talent?.image_url ? `${BASE_URL}${talent.image_url}` : null;
     const showFallback = !photo || imgError;
 
     return (

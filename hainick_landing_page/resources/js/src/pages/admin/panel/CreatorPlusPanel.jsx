@@ -1,499 +1,547 @@
 import { useState, useEffect, useRef } from "react";
-import { API_URL } from "../../../utils/api";
+import { API_URL, BASE_URL } from "../../../utils/api";
 
 const ROLE_OPTIONS = [
-  "Actor",
-  "Host",
-  "MC",
-  "Content Creator",
-  "Model",
-  "Momfluencer",
+    "Actor",
+    "Host",
+    "MC",
+    "Content Creator",
+    "Model",
+    "Momfluencer",
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmt = (n) => {
-  if (!n && n !== 0) return "—";
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
-  if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
-  return String(n);
+    if (!n && n !== 0) return "—";
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
+    return String(n);
 };
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const TikTokIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" />
-  </svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" />
+    </svg>
 );
 const IGIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-  </svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    </svg>
 );
 const XIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
 );
 const ChevronIcon = ({ open }) => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{
-      transition: "transform 0.2s",
-      transform: open ? "rotate(180deg)" : "rotate(0deg)",
-    }}
-  >
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
+    <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+            transition: "transform 0.2s",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+        }}
+    >
+        <polyline points="6 9 12 15 18 9" />
+    </svg>
 );
 
 // ── Multi-Select Roles Dropdown ───────────────────────────────────────────────
 const RolesDropdown = ({ selected, onChange }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
 
-  // Tutup dropdown ketika klik di luar
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    // Tutup dropdown ketika klik di luar
+    useEffect(() => {
+        const handler = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const toggle = (role) => {
+        if (selected.includes(role)) {
+            onChange(selected.filter((r) => r !== role));
+        } else {
+            onChange([...selected, role]);
+        }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
-  const toggle = (role) => {
-    if (selected.includes(role)) {
-      onChange(selected.filter((r) => r !== role));
-    } else {
-      onChange([...selected, role]);
-    }
-  };
+    const removeRole = (role, e) => {
+        e.stopPropagation();
+        onChange(selected.filter((r) => r !== role));
+    };
 
-  const removeRole = (role, e) => {
-    e.stopPropagation();
-    onChange(selected.filter((r) => r !== role));
-  };
-
-  return (
-    <div className="roles-dropdown-wrap" ref={ref}>
-      {/* Trigger */}
-      <div
-        className={`roles-trigger ${open ? "roles-trigger-open" : ""}`}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <div className="roles-trigger-content">
-          {selected.length === 0 ? (
-            <span className="roles-placeholder">Pilih roles...</span>
-          ) : (
-            <div className="roles-tags">
-              {selected.map((r) => (
-                <span key={r} className="roles-tag">
-                  {r}
-                  <button
-                    className="roles-tag-remove"
-                    onClick={(e) => removeRole(r, e)}
-                    type="button"
-                  >
-                    ×
-                  </button>
+    return (
+        <div className="roles-dropdown-wrap" ref={ref}>
+            {/* Trigger */}
+            <div
+                className={`roles-trigger ${open ? "roles-trigger-open" : ""}`}
+                onClick={() => setOpen((v) => !v)}
+            >
+                <div className="roles-trigger-content">
+                    {selected.length === 0 ? (
+                        <span className="roles-placeholder">
+                            Pilih roles...
+                        </span>
+                    ) : (
+                        <div className="roles-tags">
+                            {selected.map((r) => (
+                                <span key={r} className="roles-tag">
+                                    {r}
+                                    <button
+                                        className="roles-tag-remove"
+                                        onClick={(e) => removeRole(r, e)}
+                                        type="button"
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <span className="roles-chevron">
+                    <ChevronIcon open={open} />
                 </span>
-              ))}
             </div>
-          )}
-        </div>
-        <span className="roles-chevron">
-          <ChevronIcon open={open} />
-        </span>
-      </div>
 
-      {/* Dropdown menu */}
-      {open && (
-        <div className="roles-menu">
-          {ROLE_OPTIONS.map((role) => {
-            const checked = selected.includes(role);
-            return (
-              <div
-                key={role}
-                className={`roles-option ${checked ? "roles-option-checked" : ""}`}
-                onClick={() => toggle(role)}
-              >
-                <span
-                  className={`roles-checkbox ${checked ? "roles-checkbox-checked" : ""}`}
-                >
-                  {checked && (
-                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                      <polyline
-                        points="2,6 5,9 10,3"
-                        stroke="#fff"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </span>
-                <span className="roles-option-label">{role}</span>
-              </div>
-            );
-          })}
+            {/* Dropdown menu */}
+            {open && (
+                <div className="roles-menu">
+                    {ROLE_OPTIONS.map((role) => {
+                        const checked = selected.includes(role);
+                        return (
+                            <div
+                                key={role}
+                                className={`roles-option ${checked ? "roles-option-checked" : ""}`}
+                                onClick={() => toggle(role)}
+                            >
+                                <span
+                                    className={`roles-checkbox ${checked ? "roles-checkbox-checked" : ""}`}
+                                >
+                                    {checked && (
+                                        <svg
+                                            width="10"
+                                            height="10"
+                                            viewBox="0 0 12 12"
+                                            fill="none"
+                                        >
+                                            <polyline
+                                                points="2,6 5,9 10,3"
+                                                stroke="#fff"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            />
+                                        </svg>
+                                    )}
+                                </span>
+                                <span className="roles-option-label">
+                                    {role}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
-
-
 
 // ── Modal Tambah / Edit ───────────────────────────────────────────────────────
 const TalentModal = ({ mode, talent, onClose, onSaved }) => {
-  const isEdit = mode === "edit";
+    const isEdit = mode === "edit";
 
-  // Parse roles string menjadi array
-  const parseRoles = (rolesStr) => {
-    if (!rolesStr) return [];
-    return rolesStr
-      .split(",")
-      .map((r) => r.trim())
-      .filter(Boolean);
-  };
+    // Parse roles string menjadi array
+    const parseRoles = (rolesStr) => {
+        if (!rolesStr) return [];
+        return rolesStr
+            .split(",")
+            .map((r) => r.trim())
+            .filter(Boolean);
+    };
 
-  const [form, setForm] = useState({
-    name: talent?.name || "",
-    followers_instagram: talent?.followers_ig || "",
-    url_instagram: talent?.url_instagram || "",
-    followers_tiktok: talent?.followers_tiktok || "",
-    url_tiktok: talent?.url_tiktok || "",
-    followers_x: talent?.followers_x || "",
-    url_x: talent?.url_x || "",
-  });
-  const [selectedRoles, setSelectedRoles] = useState(parseRoles(talent?.roles));
-  const [imageFile, setImageFile] = useState(null);
-  const [preview, setPreview] = useState(
-    talent?.profile_image ? `${API_URL}${talent.profile_image}` : null,
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+    const [form, setForm] = useState({
+        name: talent?.name || "",
+        followers_instagram: talent?.followers_instagram || "",
+        url_instagram: talent?.url_instagram || "",
+        followers_tiktok: talent?.followers_tiktok || "",
+        url_tiktok: talent?.url_tiktok || "",
+        followers_x: talent?.followers_x || "",
+        url_x: talent?.url_x || "",
+    });
+    const [selectedRoles, setSelectedRoles] = useState(
+        parseRoles(talent?.roles),
+    );
+    const [imageFile, setImageFile] = useState(null);
+    const [preview, setPreview] = useState(
+        talent?.profile_image ? `${BASE_URL}${talent.profile_image}` : null,
+    );
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-  };
+    const handleChange = (e) => {
+        setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    };
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImageFile(file);
-    setPreview(URL.createObjectURL(file));
-  };
+    const handleImage = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImageFile(file);
+        setPreview(URL.createObjectURL(file));
+    };
 
-  const handleSubmit = async () => {
-    if (!form.name.trim()) {
-      setError("Nama harus diisi.");
-      return;
-    }
-    setLoading(true);
-    setError("");
+    const handleSubmit = async () => {
+        if (!form.name.trim()) {
+            setError("Nama harus diisi.");
+            return;
+        }
+        setLoading(true);
+        setError("");
 
-    const fd = new FormData();
-    fd.append("name", form.name);
-    fd.append("followers_instagram", form.followers_instagram || 0);
-    fd.append("url_instagram", form.url_instagram || "");
-    fd.append("followers_tiktok", form.followers_tiktok || 0);
-    fd.append("url_tiktok", form.url_tiktok || "");
-    fd.append("followers_x", form.followers_x || 0);
-    fd.append("url_x", form.url_x || "");
-    // Gabungkan array roles menjadi string dipisah koma
-    fd.append("roles", selectedRoles.join(", "));
-    if (imageFile) fd.append("profile_image", imageFile);
+        const fd = new FormData();
+        fd.append("name", form.name);
+        fd.append("followers_instagram", form.followers_instagram || 0);
+        fd.append("url_instagram", form.url_instagram || "");
+        fd.append("followers_tiktok", form.followers_tiktok || 0);
+        fd.append("url_tiktok", form.url_tiktok || "");
+        fd.append("followers_x", form.followers_x || 0);
+        fd.append("url_x", form.url_x || "");
+        // Gabungkan array roles menjadi string dipisah koma
+        fd.append("roles", selectedRoles.join(", "));
+        if (imageFile) fd.append("profile_image", imageFile);
 
-    try {
-      const url = isEdit
-        ? `${API_URL}/update-creators/${talent.id}`
-        : `${API_URL}/create-creators`;
-      const method = isEdit ? "PUT" : "POST";
-      const res = await fetch(url, { method, body: fd });
-      if (!res.ok) throw new Error("Gagal menyimpan data");
-      onSaved();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+            const url = isEdit
+                ? `${API_URL}/update-creators/${talent.id}`
+                : `${API_URL}/create-creators`;
+            const method = isEdit ? "PUT" : "POST";
+            const res = await fetch(url, { method, body: fd });
+            if (!res.ok) throw new Error("Gagal menyimpan data");
+            onSaved();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const textFields = [
-    { label: "Nama", name: "name", placeholder: "Nama lengkap talent" },
-    {
-      label: "Followers Instagram",
-      name: "followers_instagram",
-      placeholder: "misal: 50000",
-    },
-    {
-      label: "URL Instagram",
-      name: "url_instagram",
-      placeholder: "https://instagram.com/username",
-    },
-    {
-      label: "Followers TikTok",
-      name: "followers_tiktok",
-      placeholder: "misal: 120000",
-    },
-    {
-      label: "URL TikTok",
-      name: "url_tiktok",
-      placeholder: "https://tiktok.com/@username",
-    },
-    { label: "Followers X", name: "followers_x", placeholder: "misal: 8000" },
-    { label: "URL X", name: "url_x", placeholder: "https://x.com/username" },
-  ];
+    const textFields = [
+        { label: "Nama", name: "name", placeholder: "Nama lengkap talent" },
+        {
+            label: "Followers Instagram",
+            name: "followers_instagram",
+            placeholder: "misal: 50000",
+        },
+        {
+            label: "URL Instagram",
+            name: "url_instagram",
+            placeholder: "https://instagram.com/username",
+        },
+        {
+            label: "Followers TikTok",
+            name: "followers_tiktok",
+            placeholder: "misal: 120000",
+        },
+        {
+            label: "URL TikTok",
+            name: "url_tiktok",
+            placeholder: "https://tiktok.com/@username",
+        },
+        {
+            label: "Followers X",
+            name: "followers_x",
+            placeholder: "misal: 8000",
+        },
+        {
+            label: "URL X",
+            name: "url_x",
+            placeholder: "https://x.com/username",
+        },
+    ];
 
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">
-            {isEdit ? "Edit Talent" : "Tambah Talent"}
-          </h2>
-          <button className="modal-close-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+    return (
+        <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h2 className="modal-title">
+                        {isEdit ? "Edit Talent" : "Tambah Talent"}
+                    </h2>
+                    <button className="modal-close-btn" onClick={onClose}>
+                        ✕
+                    </button>
+                </div>
 
-        {/* Avatar upload */}
-        <div className="avatar-upload-wrap">
-          <div
-            className="avatar-upload-circle"
-            style={{ backgroundImage: preview ? `url(${preview})` : "none" }}
-          >
-            {!preview && <span className="avatar-placeholder">📷</span>}
-          </div>
-          <label className="avatar-change-btn">
-            Pilih Foto
-            <input type="file" accept="image/*" hidden onChange={handleImage} />
-          </label>
-        </div>
+                {/* Avatar upload */}
+                <div className="avatar-upload-wrap">
+                    <div
+                        className="avatar-upload-circle"
+                        style={{
+                            backgroundImage: preview
+                                ? `url(${preview})`
+                                : "none",
+                        }}
+                    >
+                        {!preview && (
+                            <span className="avatar-placeholder">📷</span>
+                        )}
+                    </div>
+                    <label className="avatar-change-btn">
+                        Pilih Foto
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={handleImage}
+                        />
+                    </label>
+                </div>
 
-        <div className="modal-fields">
-          {textFields.map((f) => (
-            <div className="field-group" key={f.name}>
-              <label className="field-label">{f.label}</label>
-              <input
-                className="field-input"
-                name={f.name}
-                value={form[f.name]}
-                onChange={handleChange}
-                placeholder={f.placeholder}
-              />
+                <div className="modal-fields">
+                    {textFields.map((f) => (
+                        <div className="field-group" key={f.name}>
+                            <label className="field-label">{f.label}</label>
+                            <input
+                                className="field-input"
+                                name={f.name}
+                                value={form[f.name]}
+                                onChange={handleChange}
+                                placeholder={f.placeholder}
+                            />
+                        </div>
+                    ))}
+
+                    {/* Roles multi-select dropdown */}
+                    <div className="field-group">
+                        <label className="field-label">Roles</label>
+                        <RolesDropdown
+                            selected={selectedRoles}
+                            onChange={setSelectedRoles}
+                        />
+                        {selectedRoles.length === 0 && (
+                            <span className="field-hint">
+                                Pilih satu atau lebih roles
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {error && <p className="modal-error">{error}</p>}
+
+                <div className="modal-actions">
+                    <button
+                        className="btn-cancel"
+                        onClick={onClose}
+                        disabled={loading}
+                    >
+                        Batal
+                    </button>
+                    <button
+                        className="btn-save"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading
+                            ? "Menyimpan..."
+                            : isEdit
+                              ? "Simpan Perubahan"
+                              : "Tambah Talent"}
+                    </button>
+                </div>
             </div>
-          ))}
-
-          {/* Roles multi-select dropdown */}
-          <div className="field-group">
-            <label className="field-label">Roles</label>
-            <RolesDropdown
-              selected={selectedRoles}
-              onChange={setSelectedRoles}
-            />
-            {selectedRoles.length === 0 && (
-              <span className="field-hint">Pilih satu atau lebih roles</span>
-            )}
-          </div>
         </div>
-
-        {error && <p className="modal-error">{error}</p>}
-
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose} disabled={loading}>
-            Batal
-          </button>
-          <button
-            className="btn-save"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading
-              ? "Menyimpan..."
-              : isEdit
-                ? "Simpan Perubahan"
-                : "Tambah Talent"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 // ── Konfirmasi Hapus ──────────────────────────────────────────────────────────
 const DeleteConfirm = ({ talent, onClose, onDeleted }) => {
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  const handleDelete = async () => {
-    setLoading(true);
-    try {
-      await fetch(`${API_URL}/delete-creators/${talent.id}`, {
-        method: "DELETE",
-      });
-      onDeleted();
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleDelete = async () => {
+        setLoading(true);
+        try {
+            await fetch(`${API_URL}/delete-creators/${talent.id}`, {
+                method: "DELETE",
+            });
+            onDeleted();
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div
-        className="modal-box confirm-box"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="confirm-icon">🗑️</p>
-        <h3 className="confirm-title">Hapus Talent?</h3>
-        <p className="confirm-desc">
-          <strong>{talent.name}</strong> akan dihapus permanen dan tidak bisa
-          dikembalikan.
-        </p>
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose} disabled={loading}>
-            Batal
-          </button>
-          <button
-            className="btn-delete"
-            onClick={handleDelete}
-            disabled={loading}
-          >
-            {loading ? "Menghapus..." : "Ya, Hapus"}
-          </button>
+    return (
+        <div className="modal-backdrop" onClick={onClose}>
+            <div
+                className="modal-box confirm-box"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <p className="confirm-icon">🗑️</p>
+                <h3 className="confirm-title">Hapus Talent?</h3>
+                <p className="confirm-desc">
+                    <strong>{talent.name}</strong> akan dihapus permanen dan
+                    tidak bisa dikembalikan.
+                </p>
+                <div className="modal-actions">
+                    <button
+                        className="btn-cancel"
+                        onClick={onClose}
+                        disabled={loading}
+                    >
+                        Batal
+                    </button>
+                    <button
+                        className="btn-delete"
+                        onClick={handleDelete}
+                        disabled={loading}
+                    >
+                        {loading ? "Menghapus..." : "Ya, Hapus"}
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 // ── Talent Card ───────────────────────────────────────────────────────────────
 const TalentCard = ({ talent, index, onEdit, onDelete }) => {
-  const roles = talent.roles
-    ? talent.roles
-        .split(",")
-        .map((r) => r.trim())
-        .filter(Boolean)
-    : [];
+    const roles = talent.roles
+        ? talent.roles
+              .split(",")
+              .map((r) => r.trim())
+              .filter(Boolean)
+        : [];
 
-  const imgSrc = talent.profile_image
-    ? `${API_URL}${talent.profile_image}`
-    : null;
+    const imgSrc = talent.profile_image
+        ? `${BASE_URL}${talent.profile_image}`
+        : null;
 
-  return (
-    <div className="t-card" style={{ animationDelay: `${index * 60}ms` }}>
-      {/* Avatar */}
-      <div className="t-card-avatar">
-        {imgSrc ? (
-          <img src={imgSrc} alt={talent.name} className="t-card-img" />
-        ) : (
-          <div className="t-card-img-fallback">
-            {talent.name?.[0]?.toUpperCase() || "?"}
-          </div>
-        )}
-      </div>
+    return (
+        <div className="t-card" style={{ animationDelay: `${index * 60}ms` }}>
+            {/* Avatar */}
+            <div className="t-card-avatar">
+                {imgSrc ? (
+                    <img
+                        src={imgSrc}
+                        alt={talent.name}
+                        className="t-card-img"
+                    />
+                ) : (
+                    <div className="t-card-img-fallback">
+                        {talent.name?.[0]?.toUpperCase() || "?"}
+                    </div>
+                )}
+            </div>
 
-      {/* Info */}
-      <div className="t-card-body">
-        <p className="t-card-name">{talent.name}</p>
+            {/* Info */}
+            <div className="t-card-body">
+                <p className="t-card-name">{talent.name}</p>
 
-        {roles.length > 0 && (
-          <div className="t-card-roles">
-            {roles.map((r) => (
-              <span key={r} className="t-role-badge">
-                {r}
-              </span>
-            ))}
-          </div>
-        )}
+                {roles.length > 0 && (
+                    <div className="t-card-roles">
+                        {roles.map((r) => (
+                            <span key={r} className="t-role-badge">
+                                {r}
+                            </span>
+                        ))}
+                    </div>
+                )}
 
-        {/* Stats */}
-        <div className="t-card-stats">
-          <div className="t-stat">
-            <span className="t-stat-icon t-stat-ig">
-              <IGIcon />
-            </span>
-            <span className="t-stat-val">{fmt(talent.followers_ig)}</span>
-          </div>
-          <div className="t-stat">
-            <span className="t-stat-icon t-stat-tt">
-              <TikTokIcon />
-            </span>
-            <span className="t-stat-val">{fmt(talent.followers_tiktok)}</span>
-          </div>
-          <div className="t-stat">
-            <span className="t-stat-icon t-stat-x">
-              <XIcon />
-            </span>
-            <span className="t-stat-val">{fmt(talent.followers_x)}</span>
-          </div>
+                {/* Stats */}
+                <div className="t-card-stats">
+                    <div className="t-stat">
+                        <span className="t-stat-icon t-stat-ig">
+                            <IGIcon />
+                        </span>
+                        <span className="t-stat-val">
+                            {fmt(talent.followers_instagram)}
+                        </span>
+                    </div>
+                    <div className="t-stat">
+                        <span className="t-stat-icon t-stat-tt">
+                            <TikTokIcon />
+                        </span>
+                        <span className="t-stat-val">
+                            {fmt(talent.followers_tiktok)}
+                        </span>
+                    </div>
+                    <div className="t-stat">
+                        <span className="t-stat-icon t-stat-x">
+                            <XIcon />
+                        </span>
+                        <span className="t-stat-val">
+                            {fmt(talent.followers_x)}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="t-card-actions">
+                <button className="t-action-btn" onClick={() => onEdit(talent)}>
+                    Edit
+                </button>
+                <button
+                    className="t-action-btn t-action-del"
+                    onClick={() => onDelete(talent)}
+                >
+                    Hapus
+                </button>
+            </div>
         </div>
-      </div>
-
-      {/* Actions */}
-      <div className="t-card-actions">
-        <button className="t-action-btn" onClick={() => onEdit(talent)}>
-          Edit
-        </button>
-        <button
-          className="t-action-btn t-action-del"
-          onClick={() => onDelete(talent)}
-        >
-          Hapus
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 // ── Main Panel ────────────────────────────────────────────────────────────────
 const CreatorPlusPanel = () => {
-  const [creators, setCreators] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [modal, setModal] = useState(null);
+    const [creators, setCreators] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [modal, setModal] = useState(null);
 
-  const fetchCreators = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/creators`);
-      const data = await res.json();
-      setCreators(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Gagal fetch creators:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchCreators = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/creators`);
+            const data = await res.json();
+            setCreators(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Gagal fetch creators:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  useEffect(() => {
-    fetchCreators();
-  }, []);
+    useEffect(() => {
+        fetchCreators();
+    }, []);
 
-  const handleSaved = () => {
-    setModal(null);
-    fetchCreators();
-  };
-  const handleDeleted = () => {
-    setModal(null);
-    fetchCreators();
-  };
+    const handleSaved = () => {
+        setModal(null);
+        fetchCreators();
+    };
+    const handleDeleted = () => {
+        setModal(null);
+        fetchCreators();
+    };
 
-  const filtered = creators.filter(
-    (c) =>
-      c.name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.roles?.toLowerCase().includes(search.toLowerCase()),
-  );
+    const filtered = creators.filter(
+        (c) =>
+            c.name?.toLowerCase().includes(search.toLowerCase()) ||
+            c.roles?.toLowerCase().includes(search.toLowerCase()),
+    );
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
         :root {
@@ -972,108 +1020,125 @@ const CreatorPlusPanel = () => {
         }
       `}</style>
 
-      <div className="panel-wrap">
-        {/* Header */}
-        <div className="panel-header">
-          <div>
-            <h1 className="panel-page-title">Talent</h1>
-            <p className="panel-page-sub">Kelola data talent dan creator</p>
-          </div>
-          <button
-            className="panel-add-btn"
-            onClick={() => setModal({ mode: "add" })}
-          >
-            + Tambah Talent
-          </button>
-        </div>
+            <div className="panel-wrap">
+                {/* Header */}
+                <div className="panel-header">
+                    <div>
+                        <h1 className="panel-page-title">Talent</h1>
+                        <p className="panel-page-sub">
+                            Kelola data talent dan creator
+                        </p>
+                    </div>
+                    <button
+                        className="panel-add-btn"
+                        onClick={() => setModal({ mode: "add" })}
+                    >
+                        + Tambah Talent
+                    </button>
+                </div>
 
-        {/* Stats */}
-        <div className="panel-stats">
-          <div className="stat-card">
-            <span className="stat-label">Total</span>
-            <span className="stat-value">{creators.length}</span>
-            <span className="stat-hint">talent terdaftar</span>
-          </div>
-        </div>
+                {/* Stats */}
+                <div className="panel-stats">
+                    <div className="stat-card">
+                        <span className="stat-label">Total</span>
+                        <span className="stat-value">{creators.length}</span>
+                        <span className="stat-hint">talent terdaftar</span>
+                    </div>
+                </div>
 
-        {/* Search */}
-        <div className="search-row">
-          <input
-            className="panel-search"
-            type="search"
-            placeholder="Cari nama atau role..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {!loading && (
-            <span className="count-label">
-              {filtered.length} dari {creators.length} talent
-            </span>
-          )}
-        </div>
+                {/* Search */}
+                <div className="search-row">
+                    <input
+                        className="panel-search"
+                        type="search"
+                        placeholder="Cari nama atau role..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    {!loading && (
+                        <span className="count-label">
+                            {filtered.length} dari {creators.length} talent
+                        </span>
+                    )}
+                </div>
 
-        {/* Cards */}
-        <div className="talent-grid">
-          {loading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <div className="skeleton-card" key={i}>
-                <div className="skel skel-circle" />
-                <div className="skel skel-line" style={{ width: "60%" }} />
-                <div className="skel skel-sm" style={{ width: "80%" }} />
-                <div className="skel skel-sm" style={{ width: "50%" }} />
-              </div>
-            ))
-          ) : filtered.length === 0 ? (
-            <div className="empty-state">
-              <span className="empty-icon">🎭</span>
-              <p className="empty-title">
-                {search ? "Talent tidak ditemukan" : "Belum ada talent"}
-              </p>
-              <p className="empty-sub">
-                {search
-                  ? `Tidak ada hasil untuk "${search}"`
-                  : "Klik + Tambah Talent untuk mulai"}
-              </p>
+                {/* Cards */}
+                <div className="talent-grid">
+                    {loading ? (
+                        Array.from({ length: 6 }).map((_, i) => (
+                            <div className="skeleton-card" key={i}>
+                                <div className="skel skel-circle" />
+                                <div
+                                    className="skel skel-line"
+                                    style={{ width: "60%" }}
+                                />
+                                <div
+                                    className="skel skel-sm"
+                                    style={{ width: "80%" }}
+                                />
+                                <div
+                                    className="skel skel-sm"
+                                    style={{ width: "50%" }}
+                                />
+                            </div>
+                        ))
+                    ) : filtered.length === 0 ? (
+                        <div className="empty-state">
+                            <span className="empty-icon">🎭</span>
+                            <p className="empty-title">
+                                {search
+                                    ? "Talent tidak ditemukan"
+                                    : "Belum ada talent"}
+                            </p>
+                            <p className="empty-sub">
+                                {search
+                                    ? `Tidak ada hasil untuk "${search}"`
+                                    : "Klik + Tambah Talent untuk mulai"}
+                            </p>
+                        </div>
+                    ) : (
+                        filtered.map((c, i) => (
+                            <TalentCard
+                                key={c.id}
+                                talent={c}
+                                index={i}
+                                onEdit={(t) =>
+                                    setModal({ mode: "edit", talent: t })
+                                }
+                                onDelete={(t) =>
+                                    setModal({ mode: "delete", talent: t })
+                                }
+                            />
+                        ))
+                    )}
+                </div>
             </div>
-          ) : (
-            filtered.map((c, i) => (
-              <TalentCard
-                key={c.id}
-                talent={c}
-                index={i}
-                onEdit={(t) => setModal({ mode: "edit", talent: t })}
-                onDelete={(t) => setModal({ mode: "delete", talent: t })}
-              />
-            ))
-          )}
-        </div>
-      </div>
 
-      {/* Modals */}
-      {modal?.mode === "add" && (
-        <TalentModal
-          mode="add"
-          onClose={() => setModal(null)}
-          onSaved={handleSaved}
-        />
-      )}
-      {modal?.mode === "edit" && (
-        <TalentModal
-          mode="edit"
-          talent={modal.talent}
-          onClose={() => setModal(null)}
-          onSaved={handleSaved}
-        />
-      )}
-      {modal?.mode === "delete" && (
-        <DeleteConfirm
-          talent={modal.talent}
-          onClose={() => setModal(null)}
-          onDeleted={handleDeleted}
-        />
-      )}
-    </>
-  );
+            {/* Modals */}
+            {modal?.mode === "add" && (
+                <TalentModal
+                    mode="add"
+                    onClose={() => setModal(null)}
+                    onSaved={handleSaved}
+                />
+            )}
+            {modal?.mode === "edit" && (
+                <TalentModal
+                    mode="edit"
+                    talent={modal.talent}
+                    onClose={() => setModal(null)}
+                    onSaved={handleSaved}
+                />
+            )}
+            {modal?.mode === "delete" && (
+                <DeleteConfirm
+                    talent={modal.talent}
+                    onClose={() => setModal(null)}
+                    onDeleted={handleDeleted}
+                />
+            )}
+        </>
+    );
 };
 
 export default CreatorPlusPanel;
