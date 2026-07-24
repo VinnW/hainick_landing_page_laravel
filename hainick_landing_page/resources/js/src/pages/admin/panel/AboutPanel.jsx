@@ -73,28 +73,29 @@ const AboutPanel = () => {
     setError(null);
 
     const formData = new FormData();
-    formData.append("image", previewFile); // backend pakai key "image"
+    formData.append("image_url", previewFile); // backend pakai key "image"
 
     try {
       // Cek apakah sudah ada talent_showcase
       const checkRes = await fetch(`${API_URL}/hainick-assets`);
       const assets = await checkRes.json();
-      const exists = assets.find(
-        (item) => item.image_type === "talent_showcase",
-      );
+      const exists = assets.find((item) => item.image_type === "talent_showcase");
 
       let res;
+      // 2. ALWAYS USE POST for file uploads
+      const method = "POST"; 
+
       if (exists) {
-        // UPDATE — PUT /api/update-hainick-assets/:image_type
+        // 3. SPOOF PUT method via POST
+        formData.append("_method", "PUT");
         res = await fetch(`${API_URL}/update-hainick-assets/talent_showcase`, {
-          method: "PUT",
+          method: method,
           body: formData,
         });
       } else {
-        // CREATE — POST /api/create-hainick-assets
         formData.append("image_type", "talent_showcase");
         res = await fetch(`${API_URL}/create-hainick-assets`, {
-          method: "POST",
+          method: method,
           body: formData,
         });
       }
@@ -106,7 +107,7 @@ const AboutPanel = () => {
 
       setSuccessMsg("✅ Video Talent Showcase berhasil diperbarui!");
       handleCancelModal();
-      await fetchData(); // refresh tampilan
+      await fetchData(); 
     } catch (err) {
       setError(err.message);
     } finally {

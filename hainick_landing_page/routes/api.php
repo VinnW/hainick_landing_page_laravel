@@ -39,7 +39,7 @@ Route::prefix('hainickkreatif')->group(function () {
     // ── OFFICIAL TALENTS ────────────────────────────────────────────────
     Route::controller(OfficialTalentController::class)->group(function () {
         Route::get('/load-official-talent', 'index');
-        Route::post('/load-official-talent-desc/{id}', 'showDesc');
+        Route::get('/load-official-talent-desc/{id}', 'showDesc');
         Route::post('/create-official-talent', 'store');
         Route::post('/create-official-talent-desc', 'storeDesc');
         Route::put('/update-official-talent/{id}', 'update');

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { API_URL } from "../../../utils/api";
 
-const API = `${API_URL}/api/contact`;
-const UPDATE_API = `${API_URL}/api/update-contact`;
-const CONTACT_FORM_API = `${API_URL}/api/contact-form`;
+const API = `${API_URL}/contact`;
+const UPDATE_API = `${API_URL}/update-contact`;
+const CONTACT_FORM_API = `${API_URL}/contact-form`;
 
 async function putFormData(url, payload) {
   const formData = new FormData();
@@ -269,6 +269,7 @@ const ContactPanel = () => {
     setLoading(true);
     try {
       const rows = await getJSON(API);
+      console.log("Data mentah dari API:", rows);
       setData(Array.isArray(rows) ? (rows[0] ?? null) : rows);
     } catch (err) {
       console.error("Gagal fetch contacts:", err);

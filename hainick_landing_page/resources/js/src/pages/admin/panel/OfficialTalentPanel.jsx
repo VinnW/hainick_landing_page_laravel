@@ -28,7 +28,7 @@ const TalentModal = ({ mode, talent, onClose, onSaved }) => {
     let active = true;
     setPrefillLoading(true);
     fetch(`${API_URL}/load-official-talent-desc/${talent.id}`, {
-      method: "POST",
+      method: "GET",
     })
       .then((res) => {
         if (!res.ok) throw new Error("Gagal mengambil detail talent");
@@ -410,7 +410,7 @@ const OfficialTalentPanel = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/load-official-talent`, {
-        method: "POST",
+        method: "GET",
       });
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
@@ -423,7 +423,7 @@ const OfficialTalentPanel = () => {
             const r = await fetch(
               `${API_URL}/load-official-talent-desc/${t.id}`,
               {
-                method: "POST",
+                method: "GET",
               },
             );
             const d = await r.json();

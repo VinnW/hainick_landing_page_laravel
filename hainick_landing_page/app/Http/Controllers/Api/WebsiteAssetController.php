@@ -47,17 +47,34 @@ class WebsiteAssetController extends Controller
     // PUT /hainickkreatif/update-hainick-assets/{image_type}
     public function update(Request $request, string $imageType)
     {
-        if (! $request->hasFile('image_url')) {
-            return response()->json(['error' => 'Gambar harus diunggah'], 400);
+        if (!$request->hasFile('image_url')) {
+            return response()->json(['error' => 'File harus diunggah'], 400);
         }
 
-        $image = $this->convertToWebp($request->file('image_url'));
+        $file = $request->file('image_url');
+        $mimeType = $file->getMimeType();
+        $path = '';
 
+        // 2. Determine if it's an image or a video/other
+        if (str_starts_with($mimeType, 'image/')) {
+            // It's an image: Use your Trait to convert to WebP
+            $path = $this->convertToWebp($file);
+        } else {
+            // It's a video/other: Save it as-is
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $storedPath = $file->storeAs('uploads', $filename, 'public');
+            $path = '/storage/' . $storedPath;
+        }
+
+        // 3. Update the database
         DB::table('website_assets')
             ->where('image_type', $imageType)
-            ->update(['image_url' => $image]);
+            ->update(['image_url' => $path]);
 
-        return response()->json(['message' => 'Gambar website berhasil diperbarui'], 200);
+        return response()->json([
+            'message' => 'File berhasil diperbarui',
+            'url' => $path
+        ], 200);
     }
 
     // DELETE /hainickkreatif/delete-hainick-assets/{image_type}
