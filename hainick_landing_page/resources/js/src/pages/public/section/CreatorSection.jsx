@@ -283,7 +283,7 @@ export default function CreatorsSection() {
 
         (async () => {
             try {
-                const res = await fetch(`${BASE_URL}/creators-photocard`, {
+                const res = await fetch(`${API_URL}/creators-photocard`, {
                     signal: ctrl.signal,
                 });
                 if (!res.ok) return;

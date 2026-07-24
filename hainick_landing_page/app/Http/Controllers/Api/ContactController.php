@@ -81,7 +81,6 @@ class ContactController extends Controller
             'last_name' => $lastName,
             'email' => $email,
             'message' => $message,
-            'created_at' => now(),
         ]);
 
         return response()->json([

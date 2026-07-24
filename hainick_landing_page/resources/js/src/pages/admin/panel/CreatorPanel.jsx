@@ -315,7 +315,7 @@ const CreatorPanel = () => {
     const fetchAll = async () => {
         setPageLoading(true);
         try {
-            const resCards = await fetch(`${BASE_URL}/creators-photocard`);
+            const resCards = await fetch(`${API_URL}/creators-photocard`);
             if (resCards.ok) {
                 const data = await resCards.json();
                 setCards((prev) =>

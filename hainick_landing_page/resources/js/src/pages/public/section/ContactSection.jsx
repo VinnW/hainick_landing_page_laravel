@@ -7,232 +7,243 @@ import hainickLogo from "../../../storage/logo/hainick_logo.png";
 import { API_URL } from "../../../utils/api";
 // ── Icon components ───────────────────────────────────────────────────────────
 const InstagramIcon = () => (
-  <img
-    src={instagramIcon}
-    alt="Instagram"
-    width={20}
-    height={20}
-    style={{ objectFit: "contain", display: "block" }}
-  />
+    <img
+        src={instagramIcon}
+        alt="Instagram"
+        width={20}
+        height={20}
+        style={{ objectFit: "contain", display: "block" }}
+    />
 );
 const EmailIcon = () => (
-  <img
-    src={mailIcon}
-    alt="Email"
-    width={20}
-    height={20}
-    style={{ objectFit: "contain", display: "block" }}
-  />
+    <img
+        src={mailIcon}
+        alt="Email"
+        width={20}
+        height={20}
+        style={{ objectFit: "contain", display: "block" }}
+    />
 );
 const PhoneIcon = () => (
-  <img
-    src={telephoneIcon}
-    alt="Telephone"
-    width={20}
-    height={20}
-    style={{ objectFit: "contain", display: "block" }}
-  />
+    <img
+        src={telephoneIcon}
+        alt="Telephone"
+        width={20}
+        height={20}
+        style={{ objectFit: "contain", display: "block" }}
+    />
 );
 
 // ── Info kontak (kanan) ───────────────────────────────────────────────────────
 function ContactPanel({ contact }) {
-  if (!contact) return null;
-  const phones = [contact.phone_number1, contact.phone_number2].filter(Boolean);
+    if (!contact) return null;
+    const phones = [contact.phone_number1, contact.phone_number2].filter(
+        Boolean,
+    );
 
-  return (
-    <div className="contact-panel">
-      <span className="panel-brand">
-        <img src={hainickLogo} alt="hainick logo" />
-      </span>
-      <div className="panel-rows">
-        {contact.instagram && (
-          <div className="panel-row">
-            <span className="panel-icon">
-              <InstagramIcon />
+    return (
+        <div className="contact-panel">
+            <span className="panel-brand">
+                <img src={hainickLogo} alt="hainick logo" />
             </span>
-            <span className="panel-text">{contact.instagram}</span>
-          </div>
-        )}
-        {contact.gmail && (
-          <div className="panel-row">
-            <span className="panel-icon">
-              <EmailIcon />
-            </span>
-            <span className="panel-text">{contact.gmail}</span>
-          </div>
-        )}
-        {phones.length > 0 && (
-          <div className="panel-row panel-row-phone">
-            <span className="panel-icon panel-icon-top">
-              <PhoneIcon />
-            </span>
-            <div className="panel-phones">
-              {phones.map((num, i) => (
-                <span key={i} className="panel-text panel-phone-line">
-                  <strong>{num}</strong>
-                </span>
-              ))}
+            <div className="panel-rows">
+                {contact.instagram && (
+                    <div className="panel-row">
+                        <span className="panel-icon">
+                            <InstagramIcon />
+                        </span>
+                        <span className="panel-text">{contact.instagram}</span>
+                    </div>
+                )}
+                {contact.gmail && (
+                    <div className="panel-row">
+                        <span className="panel-icon">
+                            <EmailIcon />
+                        </span>
+                        <span className="panel-text">{contact.gmail}</span>
+                    </div>
+                )}
+                {phones.length > 0 && (
+                    <div className="panel-row panel-row-phone">
+                        <span className="panel-icon panel-icon-top">
+                            <PhoneIcon />
+                        </span>
+                        <div className="panel-phones">
+                            {phones.map((num, i) => (
+                                <span
+                                    key={i}
+                                    className="panel-text panel-phone-line"
+                                >
+                                    <strong>{num}</strong>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
 
 // ── Skeleton loader ───────────────────────────────────────────────────────────
 function ContactSkeleton() {
-  return (
-    <div className="contact-skeleton">
-      <div
-        className="skeleton-line short"
-        style={{ height: "22px", marginBottom: "4px" }}
-      />
-      <div className="skeleton-line mid" />
-      <div className="skeleton-line long" />
-      <div className="skeleton-line mid" />
-    </div>
-  );
+    return (
+        <div className="contact-skeleton">
+            <div
+                className="skeleton-line short"
+                style={{ height: "22px", marginBottom: "4px" }}
+            />
+            <div className="skeleton-line mid" />
+            <div className="skeleton-line long" />
+            <div className="skeleton-line mid" />
+        </div>
+    );
 }
 
 // ── Form kontak (kiri) ────────────────────────────────────────────────────────
 function ContactForm() {
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    message: "",
-  });
-  const [status, setStatus] = useState(null); // null | "loading" | "success" | "error"
-  const [errorMsg, setErrorMsg] = useState("");
+    const [form, setForm] = useState({
+        first_name: "",
+        last_name: "",
+        email: "",
+        message: "",
+    });
+    const [status, setStatus] = useState(null); // null | "loading" | "success" | "error"
+    const [errorMsg, setErrorMsg] = useState("");
 
-  const handleChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const handleChange = (e) =>
+        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus("loading");
-    setErrorMsg("");
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setStatus("loading");
+        setErrorMsg("");
 
-    try {
-      const res = await fetch(`${API_URL}/create-contact-form`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          first_name: form.firstName.trim(),
-          last_name: form.lastName.trim(),
-          email: form.email.trim(),
-          message: form.message.trim(),
-        }),
-      });
+        try {
+            const res = await fetch(`${API_URL}/create-contact-form`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    first_name: form.first_name.trim(),
+                    last_name: form.last_name.trim(),
+                    email: form.email.trim(),
+                    message: form.message.trim(),
+                }),
+            });
 
-      const data = await res.json();
+            const data = await res.json();
 
-      if (!res.ok) {
-        setErrorMsg(data.error || "Gagal mengirim pesan.");
-        setStatus("error");
-        setTimeout(() => setStatus(null), 4000);
-        return;
-      }
+            if (!res.ok) {
+                setErrorMsg(data.error || "Gagal mengirim pesan.");
+                setStatus("error");
+                setTimeout(() => setStatus(null), 4000);
+                return;
+            }
 
-      setStatus("success");
-      setForm({ firstName: "", lastName: "", email: "", message: "" });
-      setTimeout(() => setStatus(null), 4000);
-    } catch {
-      setErrorMsg("Tidak dapat terhubung ke server.");
-      setStatus("error");
-      setTimeout(() => setStatus(null), 4000);
-    }
-  };
+            setStatus("success");
+            setForm({ firstName: "", lastName: "", email: "", message: "" });
+            setTimeout(() => setStatus(null), 4000);
+        } catch {
+            setErrorMsg("Tidak dapat terhubung ke server.");
+            setStatus("error");
+            setTimeout(() => setStatus(null), 4000);
+        }
+    };
 
-  const isLoading = status === "loading";
+    const isLoading = status === "loading";
 
-  return (
-    <div className="contact-form-wrap">
-      <h3 className="form-heading">Let's get in touch</h3>
-      <form className="contact-form" onSubmit={handleSubmit}>
-        <div className="form-row">
-          <input
-            className="form-input"
-            type="text"
-            name="firstName"
-            placeholder="First name"
-            value={form.firstName}
-            onChange={handleChange}
-            required
-            disabled={isLoading}
-          />
-          <input
-            className="form-input"
-            type="text"
-            name="lastName"
-            placeholder="Last name"
-            value={form.lastName}
-            onChange={handleChange}
-            required
-            disabled={isLoading}
-          />
+    return (
+        <div className="contact-form-wrap">
+            <h3 className="form-heading">Let's get in touch</h3>
+            <form className="contact-form" onSubmit={handleSubmit}>
+                <div className="form-row">
+                    <input
+                        className="form-input"
+                        type="text"
+                        name="first_name"
+                        placeholder="First name"
+                        value={form.first_name}
+                        onChange={handleChange}
+                        required
+                        disabled={isLoading}
+                    />
+                    <input
+                        className="form-input"
+                        type="text"
+                        name="last_name"
+                        placeholder="Last name"
+                        value={form.last_name}
+                        onChange={handleChange}
+                        required
+                        disabled={isLoading}
+                    />
+                </div>
+                <input
+                    className="form-input"
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                />
+                <textarea
+                    className="form-input form-textarea"
+                    name="message"
+                    placeholder="Message"
+                    value={form.message}
+                    onChange={handleChange}
+                    rows={5}
+                    required
+                    disabled={isLoading}
+                />
+                <div className="form-footer">
+                    <button
+                        className="submit-btn"
+                        type="submit"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Sending..." : "Submit"}
+                    </button>
+                    {status === "success" && (
+                        <span className="form-status form-status-ok">
+                            ✓ Pesan berhasil terkirim!
+                        </span>
+                    )}
+                    {status === "error" && (
+                        <span className="form-status form-status-err">
+                            ✕ {errorMsg}
+                        </span>
+                    )}
+                </div>
+            </form>
         </div>
-        <input
-          className="form-input"
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        />
-        <textarea
-          className="form-input form-textarea"
-          name="message"
-          placeholder="Message"
-          value={form.message}
-          onChange={handleChange}
-          rows={5}
-          required
-          disabled={isLoading}
-        />
-        <div className="form-footer">
-          <button className="submit-btn" type="submit" disabled={isLoading}>
-            {isLoading ? "Sending..." : "Submit"}
-          </button>
-          {status === "success" && (
-            <span className="form-status form-status-ok">
-              ✓ Pesan berhasil terkirim!
-            </span>
-          )}
-          {status === "error" && (
-            <span className="form-status form-status-err">✕ {errorMsg}</span>
-          )}
-        </div>
-      </form>
-    </div>
-  );
+    );
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function ContactSection() {
-  const [contact, setContact] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [contact, setContact] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`${API_URL}/contact`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Gagal fetch contacts");
-        return r.json();
-      })
-      .then((data) => {
-        const row = Array.isArray(data) ? (data[0] ?? null) : data;
-        setContact(row);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    useEffect(() => {
+        fetch(`${API_URL}/contact`)
+            .then((r) => {
+                if (!r.ok) throw new Error("Gagal fetch contacts");
+                return r.json();
+            })
+            .then((data) => {
+                const row = Array.isArray(data) ? (data[0] ?? null) : data;
+                setContact(row);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         .contact-section{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;padding:64px 24px;box-sizing:border-box}
         .contact-section-title{text-align:center;font-size:clamp(1.4rem,3vw,2rem);font-weight:800;letter-spacing:-.03em;color:#0a0a0a;margin:0 0 52px}
@@ -272,13 +283,17 @@ export default function ContactSection() {
         @media(max-width:480px){.form-row{grid-template-columns:1fr;gap:14px}.contact-section{padding:32px 14px}.form-heading{font-size:18px}.form-input{padding:11px 12px;font-size:13px}.submit-btn{padding:11px 24px;font-size:13px}.panel-text{font-size:13px}.contact-section-title{margin:0 0 36px}}
       `}</style>
 
-      <section className="contact-section">
-        <h2 className="contact-section-title">Contact Us</h2>
-        <div className="contact-layout">
-          <ContactForm />
-          {loading ? <ContactSkeleton /> : <ContactPanel contact={contact} />}
-        </div>
-      </section>
-    </>
-  );
+            <section className="contact-section">
+                <h2 className="contact-section-title">Contact Us</h2>
+                <div className="contact-layout">
+                    <ContactForm />
+                    {loading ? (
+                        <ContactSkeleton />
+                    ) : (
+                        <ContactPanel contact={contact} />
+                    )}
+                </div>
+            </section>
+        </>
+    );
 }
