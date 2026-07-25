@@ -138,6 +138,7 @@ const OfficialTalentModal = ({ talentId, thumbnailUrl, onClose }) => {
     const [desc, setDesc] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [imgError, setImgError] = useState(false);
 
     const loadDetail = useCallback(() => {
         const controller = new AbortController();
@@ -193,9 +194,10 @@ const OfficialTalentModal = ({ talentId, thumbnailUrl, onClose }) => {
         };
     }, [onClose]);
 
-    const photo = desc?.image_url
-        ? `${API_URL}${desc.image_url}`
-        : thumbnailUrl;
+    const photo =
+        !imgError && desc?.image_url
+            ? `${BASE_URL}${desc.image_url}`
+            : thumbnailUrl;
     const hasPhysical = desc?.tinggi || desc?.berat || desc?.umur;
 
     return (
@@ -821,7 +823,7 @@ export default function OfficialTalentSection() {
                     talentId={selected.id}
                     thumbnailUrl={
                         selected.image_url
-                            ? `${API_URL}${selected.image_url}`
+                            ? `${BASE_URL}${selected.image_url}`
                             : null
                     }
                     onClose={() => setSelected(null)}

@@ -141,7 +141,7 @@ function ContactForm() {
             }
 
             setStatus("success");
-            setForm({ firstName: "", lastName: "", email: "", message: "" });
+            setForm({ first_name: "", last_name: "", email: "", message: "" });
             setTimeout(() => setStatus(null), 4000);
         } catch {
             setErrorMsg("Tidak dapat terhubung ke server.");

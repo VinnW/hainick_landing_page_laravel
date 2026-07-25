@@ -19,35 +19,14 @@ class WebsiteAssetController extends Controller
     }
 
     // POST /hainickkreatif/create-hainick-assets
+    // POST /api/create-hainick-assets
     public function store(Request $request)
     {
         $imageType = $request->input('image_type');
         if (! $imageType) {
-            return response()->json(['error' => 'Tipe gambar harus diisi'], 400);
+            return response()->json(['error' => 'Tipe aset harus diisi'], 400);
         }
         if (! $request->hasFile('image_url')) {
-            return response()->json(['error' => 'Gambar harus diunggah'], 400);
-        }
-
-        $image = $this->convertToWebp($request->file('image_url'));
-
-        DB::table('website_assets')->insertGetId([
-            'image_type' => $imageType,
-            'image_url' => $image,
-        ]);
-
-        return response()->json([
-            'message' => 'Hainick update berhasil ditambahkan',
-            'imagetype' => $imageType,
-            'imageUrl' => $image,
-        ], 201);
-    }
-
-    
-    // PUT /hainickkreatif/update-hainick-assets/{image_type}
-    public function update(Request $request, string $imageType)
-    {
-        if (!$request->hasFile('image_url')) {
             return response()->json(['error' => 'File harus diunggah'], 400);
         }
 
@@ -55,25 +34,61 @@ class WebsiteAssetController extends Controller
         $mimeType = $file->getMimeType();
         $path = '';
 
-        // 2. Determine if it's an image or a video/other
+        // CEK TIPE FILE: Gambar atau Video?
         if (str_starts_with($mimeType, 'image/')) {
-            // It's an image: Use your Trait to convert to WebP
+            // Jika gambar, convert ke WebP
             $path = $this->convertToWebp($file);
         } else {
-            // It's a video/other: Save it as-is
+            // Jika video (atau file lain), langsung simpan aslinya
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $storedPath = $file->storeAs('uploads', $filename, 'public');
             $path = '/storage/' . $storedPath;
         }
 
-        // 3. Update the database
-        DB::table('website_assets')
+        DB::table('website_assets')->insertGetId([
+            'image_type' => $imageType,
+            'image_url' => $path,
+        ]);
+
+        return response()->json([
+            'message' => 'Hainick asset berhasil ditambahkan',
+            'imagetype' => $imageType,
+            'imageUrl' => $path,
+        ], 201);
+    }
+
+
+    // PUT /api/update-hainick-assets/{image_type}
+    public function update(Request $request, string $imageType)
+    {
+        if (! $request->hasFile('image_url')) {
+            return response()->json(['error' => 'File harus diunggah'], 400);
+        }
+
+        $file = $request->file('image_url');
+        $mimeType = $file->getMimeType();
+        $path = '';
+
+        // LOGIKA YANG SAMA UNTUK UPDATE
+        if (str_starts_with($mimeType, 'image/')) {
+            $path = $this->convertToWebp($file);
+        } else {
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $storedPath = $file->storeAs('uploads', $filename, 'public');
+            $path = '/storage/' . $storedPath;
+        }
+
+        $affected = DB::table('website_assets')
             ->where('image_type', $imageType)
             ->update(['image_url' => $path]);
 
+        if ($affected === 0) {
+            return response()->json(['error' => 'Aset tidak ditemukan'], 404);
+        }
+
         return response()->json([
-            'message' => 'File berhasil diperbarui',
-            'url' => $path
+            'message' => 'Hainick asset berhasil diperbarui',
+            'imageUrl' => $path,
         ], 200);
     }
 

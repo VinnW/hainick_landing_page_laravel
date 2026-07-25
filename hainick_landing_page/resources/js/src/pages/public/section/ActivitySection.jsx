@@ -6,118 +6,118 @@ import avatarD from "../../../storage/picture/d.png";
 import avatarE from "../../../storage/picture/e.png";
 import avatarF from "../../../storage/picture/f.png";
 import avatarCenter from "../../../storage/picture/center.png";
-import { API_URL } from "../../../utils/api";
+import { API_URL, BASE_URL } from "../../../utils/api";
 
 // ── Interval polling (ms) ─────────────────────────────────────────────────────
 const POLL_INTERVAL = 5000;
 
 // ── Avatar placeholder untuk Community section ───────────────────────────────
 const AVATARS = [
-  { id: 1, src: avatarA },
-  { id: 2, src: avatarB },
-  { id: 3, src: avatarC },
-  { id: 4, src: avatarD },
-  { id: 5, src: avatarE },
-  { id: 6, src: avatarF },
+    { id: 1, src: avatarA },
+    { id: 2, src: avatarB },
+    { id: 3, src: avatarC },
+    { id: 4, src: avatarD },
+    { id: 5, src: avatarE },
+    { id: 6, src: avatarF },
 ];
 
 // ── Urutan posisi enum ke slot grid ──────────────────────────────────────────
 const SLOT_ORDER = [
-  "image_left",
-  "image_center",
-  "image_right",
-  "image_bottom_left",
-  "image_bottom_right",
+    "image_left",
+    "image_center",
+    "image_right",
+    "image_bottom_left",
+    "image_bottom_right",
 ];
 
 const JOIN_LINK = "https://wa.me/6282136358570";
 
 // ── Merge rows: gabungkan baris dengan image_type yang sama ──────────────────
 function mergeRows(rawData) {
-  const map = {};
-  rawData.forEach((item) => {
-    const key = item.image_type;
-    if (!key || !SLOT_ORDER.includes(key)) return;
-    if (!map[key]) {
-      map[key] = { ...item };
-    } else {
-      if (!map[key].image_url && item.image_url)
-        map[key].image_url = item.image_url;
-      if (!map[key].description && item.description)
-        map[key].description = item.description;
-      if (item.is_active === 1) map[key].is_active = 1;
-    }
-  });
-  return Object.values(map);
+    const map = {};
+    rawData.forEach((item) => {
+        const key = item.image_type;
+        if (!key || !SLOT_ORDER.includes(key)) return;
+        if (!map[key]) {
+            map[key] = { ...item };
+        } else {
+            if (!map[key].image_url && item.image_url)
+                map[key].image_url = item.image_url;
+            if (!map[key].description && item.description)
+                map[key].description = item.description;
+            if (item.is_active === 1) map[key].is_active = 1;
+        }
+    });
+    return Object.values(map);
 }
 
 // ── ActivitySection ───────────────────────────────────────────────────────────
 export default function ActivitySection({ title = "Hainick Update" }) {
-  const [activities, setActivities] = useState([]);
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [activities, setActivities] = useState([]);
+    const [selectedActivity, setSelectedActivity] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  // ── Core fetch (tidak reset loading setelah fetch pertama, agar tidak flicker) ──
-  const isMounted = useRef(true);
+    // ── Core fetch (tidak reset loading setelah fetch pertama, agar tidak flicker) ──
+    const isMounted = useRef(true);
 
-  const fetchData = useCallback(async (isInitial = false) => {
-    if (isInitial) setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/updates-section`);
-      const data = await res.json();
-      if (!isMounted.current) return;
+    const fetchData = useCallback(async (isInitial = false) => {
+        if (isInitial) setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/updates-section`);
+            const data = await res.json();
+            if (!isMounted.current) return;
 
-      const raw = Array.isArray(data) ? data : [];
-      const merged = mergeRows(raw);
-      const activeItems = merged
-        .filter((item) => item.is_active === 1)
-        .slice(0, 5)
-        .sort((a, b) => {
-          const ai = SLOT_ORDER.indexOf(a.image_type);
-          const bi = SLOT_ORDER.indexOf(b.image_type);
-          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-        });
+            const raw = Array.isArray(data) ? data : [];
+            const merged = mergeRows(raw);
+            const activeItems = merged
+                .filter((item) => item.is_active === 1)
+                .slice(0, 5)
+                .sort((a, b) => {
+                    const ai = SLOT_ORDER.indexOf(a.image_type);
+                    const bi = SLOT_ORDER.indexOf(b.image_type);
+                    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+                });
 
-      setActivities(activeItems);
-    } catch (e) {
-      console.error("Gagal mengambil data activity:", e);
-    } finally {
-      if (isMounted.current) setLoading(false);
-    }
-  }, []);
+            setActivities(activeItems);
+        } catch (e) {
+            console.error("Gagal mengambil data activity:", e);
+        } finally {
+            if (isMounted.current) setLoading(false);
+        }
+    }, []);
 
-  useEffect(() => {
-    isMounted.current = true;
+    useEffect(() => {
+        isMounted.current = true;
 
-    // ── 1. Fetch pertama ──
-    fetchData(true);
+        // ── 1. Fetch pertama ──
+        fetchData(true);
 
-    // ── 2. Polling otomatis ──
-    const pollTimer = setInterval(() => fetchData(false), POLL_INTERVAL);
+        // ── 2. Polling otomatis ──
+        const pollTimer = setInterval(() => fetchData(false), POLL_INTERVAL);
 
-    // ── 3. Refetch saat tab kembali aktif ──
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") fetchData(false);
-    };
-    const handleFocus = () => fetchData(false);
+        // ── 3. Refetch saat tab kembali aktif ──
+        const handleVisibility = () => {
+            if (document.visibilityState === "visible") fetchData(false);
+        };
+        const handleFocus = () => fetchData(false);
 
-    document.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("focus", handleFocus);
+        document.addEventListener("visibilitychange", handleVisibility);
+        window.addEventListener("focus", handleFocus);
 
-    return () => {
-      isMounted.current = false;
-      clearInterval(pollTimer);
-      document.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [fetchData]);
+        return () => {
+            isMounted.current = false;
+            clearInterval(pollTimer);
+            document.removeEventListener("visibilitychange", handleVisibility);
+            window.removeEventListener("focus", handleFocus);
+        };
+    }, [fetchData]);
 
-  const topItems = activities.slice(0, 3);
-  const bottomItems = activities.slice(3);
+    const topItems = activities.slice(0, 3);
+    const bottomItems = activities.slice(3);
 
-  return (
-    <>
-      <style>{`
+    return (
+        <>
+            <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
         /* ───── UPDATE SECTION ───── */
@@ -458,186 +458,195 @@ export default function ActivitySection({ title = "Hainick Update" }) {
         }
       `}</style>
 
-      <div className="act-outer">
-        {/* ── Update Section ── */}
-        <section
-          id="activity"
-          className="act-root"
-          style={{ scrollMarginTop: "80px" }}
-        >
-          <h2 className="act-heading">{title}</h2>
+            <div className="act-outer">
+                {/* ── Update Section ── */}
+                <section
+                    id="activity"
+                    className="act-root"
+                    style={{ scrollMarginTop: "80px" }}
+                >
+                    <h2 className="act-heading">{title}</h2>
 
-          {loading ? (
-            <div className="act-grid-wrapper">
-              <div className="act-row-top">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="act-skeleton" />
-                ))}
-              </div>
-              <div className="act-row-bottom">
-                {[0, 1].map((i) => (
-                  <div key={i} className="act-skeleton" />
-                ))}
-              </div>
+                    {loading ? (
+                        <div className="act-grid-wrapper">
+                            <div className="act-row-top">
+                                {[0, 1, 2].map((i) => (
+                                    <div key={i} className="act-skeleton" />
+                                ))}
+                            </div>
+                            <div className="act-row-bottom">
+                                {[0, 1].map((i) => (
+                                    <div key={i} className="act-skeleton" />
+                                ))}
+                            </div>
+                        </div>
+                    ) : activities.length > 0 ? (
+                        <>
+                            <div className="act-grid-wrapper">
+                                {topItems.length > 0 && (
+                                    <div className="act-row-top">
+                                        {topItems.map((item) => (
+                                            <ActivityCard
+                                                key={item.image_type}
+                                                item={item}
+                                                onClick={() =>
+                                                    setSelectedActivity(item)
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                                {bottomItems.length > 0 && (
+                                    <div className="act-row-bottom">
+                                        {bottomItems.map((item) => (
+                                            <ActivityCard
+                                                key={item.image_type}
+                                                item={item}
+                                                onClick={() =>
+                                                    setSelectedActivity(item)
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ── Caption teks di bawah grid ── */}
+                            <p className="act-caption">
+                                The Hainick team has traveled across Indonesia
+                                to Bali, Jogjakarta, Surabaya, Medan, and
+                                Balikpapan, connecting with talented creators in
+                                each city. These journeys have allowed us to
+                                discover unique local talents and showcase the
+                                incredible creative potential throughout our
+                                diverse archipelago. We're excited to
+                                demonstrate to our partners and clients that
+                                compelling campaigns can emerge from every
+                                corner of Indonesia. Thank you to all the
+                                amazing communities who welcomed us!
+                            </p>
+                        </>
+                    ) : null}
+                </section>
+
+                {/* ── Community / Join Section ── */}
+                <div className="community-root">
+                    <h2 className="community-title">Join our community!</h2>
+                    <p className="community-subtitle">
+                        Grow together in a healthy KOL management — not just
+                        chasing virality.
+                        <br />
+                        Get the opportunity to collaborate with brands and
+                        events.
+                    </p>
+
+                    <div className="community-center-wrap">
+                        <img
+                            className="community-avatar av-1"
+                            src={AVATARS[0].src}
+                            alt="creator"
+                        />
+                        <img
+                            className="community-avatar av-2"
+                            src={AVATARS[1].src}
+                            alt="creator"
+                        />
+                        <img
+                            className="community-avatar av-3"
+                            src={AVATARS[2].src}
+                            alt="creator"
+                        />
+                        <img
+                            className="community-center-avatar"
+                            src={avatarCenter}
+                            alt="community"
+                        />
+                        <img
+                            className="community-avatar av-4"
+                            src={AVATARS[3].src}
+                            alt="creator"
+                        />
+                        <img
+                            className="community-avatar av-5"
+                            src={AVATARS[4].src}
+                            alt="creator"
+                        />
+                        <img
+                            className="community-avatar av-6"
+                            src={AVATARS[5].src}
+                            alt="creator"
+                        />
+                    </div>
+
+                    <a
+                        className="community-join-btn"
+                        href={JOIN_LINK}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Join
+                    </a>
+                </div>
             </div>
-          ) : activities.length > 0 ? (
-            <>
-              <div className="act-grid-wrapper">
-                {topItems.length > 0 && (
-                  <div className="act-row-top">
-                    {topItems.map((item) => (
-                      <ActivityCard
-                        key={item.image_type}
-                        item={item}
-                        onClick={() => setSelectedActivity(item)}
-                      />
-                    ))}
-                  </div>
-                )}
-                {bottomItems.length > 0 && (
-                  <div className="act-row-bottom">
-                    {bottomItems.map((item) => (
-                      <ActivityCard
-                        key={item.image_type}
-                        item={item}
-                        onClick={() => setSelectedActivity(item)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              {/* ── Caption teks di bawah grid ── */}
-              <p className="act-caption">
-                The Hainick team has traveled across Indonesia to Bali,
-                Jogjakarta, Surabaya, Medan, and Balikpapan, connecting with
-                talented creators in each city. These journeys have allowed us
-                to discover unique local talents and showcase the incredible
-                creative potential throughout our diverse archipelago. We're
-                excited to demonstrate to our partners and clients that
-                compelling campaigns can emerge from every corner of Indonesia.
-                Thank you to all the amazing communities who welcomed us!
-              </p>
-            </>
-          ) : null}
-        </section>
-
-        {/* ── Community / Join Section ── */}
-        <div className="community-root">
-          <h2 className="community-title">Join our community!</h2>
-          <p className="community-subtitle">
-            Grow together in a healthy KOL management — not just chasing
-            virality.
-            <br />
-            Get the opportunity to collaborate with brands and events.
-          </p>
-
-          <div className="community-center-wrap">
-            <img
-              className="community-avatar av-1"
-              src={AVATARS[0].src}
-              alt="creator"
-            />
-            <img
-              className="community-avatar av-2"
-              src={AVATARS[1].src}
-              alt="creator"
-            />
-            <img
-              className="community-avatar av-3"
-              src={AVATARS[2].src}
-              alt="creator"
-            />
-            <img
-              className="community-center-avatar"
-              src={avatarCenter}
-              alt="community"
-            />
-            <img
-              className="community-avatar av-4"
-              src={AVATARS[3].src}
-              alt="creator"
-            />
-            <img
-              className="community-avatar av-5"
-              src={AVATARS[4].src}
-              alt="creator"
-            />
-            <img
-              className="community-avatar av-6"
-              src={AVATARS[5].src}
-              alt="creator"
-            />
-          </div>
-
-          <a
-            className="community-join-btn"
-            href={JOIN_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Join
-          </a>
-        </div>
-      </div>
-
-      {/* ── Activity Detail Modal ── */}
-      {selectedActivity && (
-        <div
-          className="act-modal-bg"
-          onClick={(e) =>
-            e.target === e.currentTarget && setSelectedActivity(null)
-          }
-        >
-          <div className="act-modal">
-            <div className="act-modal-img-wrap">
-              <img
-                src={`http://localhost:8000${selectedActivity.image_url}`}
-                alt={selectedActivity.image_type}
-              />
-              <button
-                className="act-modal-close"
-                onClick={() => setSelectedActivity(null)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="act-modal-body">
-              <p className="act-modal-desc">
-                {selectedActivity.description ? (
-                  selectedActivity.description
-                ) : (
-                  <span className="act-modal-empty">
-                    Deskripsi belum tersedia.
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+            {/* ── Activity Detail Modal ── */}
+            {selectedActivity && (
+                <div
+                    className="act-modal-bg"
+                    onClick={(e) =>
+                        e.target === e.currentTarget &&
+                        setSelectedActivity(null)
+                    }
+                >
+                    <div className="act-modal">
+                        <div className="act-modal-img-wrap">
+                            <img
+                                src={`${BASE_URL}${selectedActivity.image_url}`}
+                                alt={selectedActivity.image_type}
+                            />
+                            <button
+                                className="act-modal-close"
+                                onClick={() => setSelectedActivity(null)}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="act-modal-body">
+                            <p className="act-modal-desc">
+                                {selectedActivity.description ? (
+                                    selectedActivity.description
+                                ) : (
+                                    <span className="act-modal-empty">
+                                        Deskripsi belum tersedia.
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
 }
 
 // ── Activity Card sub-component ───────────────────────────────────────────────
 function ActivityCard({ item, onClick }) {
-  return (
-    <div
-      className="act-card"
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
-    >
-      <img
-        src={`http://localhost:8000${item.image_url}`}
-        alt={item.image_type}
-        loading="lazy"
-      />
-      <div className="act-card-overlay">
-        <span className="act-card-hint">Lihat detail</span>
-      </div>
-    </div>
-  );
+    return (
+        <div
+            className="act-card"
+            onClick={onClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
+        >
+            <img
+                src={`${BASE_URL}${item.image_url}`}
+                alt={item.image_type}
+                loading="lazy"
+            />
+            <div className="act-card-overlay">
+                <span className="act-card-hint">Lihat detail</span>
+            </div>
+        </div>
+    );
 }

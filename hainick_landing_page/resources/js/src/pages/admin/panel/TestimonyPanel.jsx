@@ -213,14 +213,17 @@ const TestimonyPanel = () => {
         fd.append("name", fName.trim());
         fd.append("testimonial", fText.trim());
         if (fFile) fd.append("profile_image", fFile);
+        if (modal === "edit") fd.append("_method", "PUT"); // method spoofing untuk Laravel
+
         try {
             const url =
                 modal === "add"
                     ? `${API_URL}/create-testimonials`
                     : `${API_URL}/update-testimonials/${selected.id}`;
-            const method = modal === "add" ? "POST" : "PUT";
-            const res = await fetch(url, { method, body: fd });
+
+            const res = await fetch(url, { method: "POST", body: fd }); // ← selalu POST
             if (!res.ok) throw new Error();
+
             showToast(
                 modal === "add"
                     ? "Testimony berhasil ditambahkan!"
